@@ -15,8 +15,11 @@
 class BigInt {
 private:
   // TODO: add fields
+  
+  bool negative;
 
 public:
+  std::vector<uint64_t> bit_string;
   //! Default constructor.
   //! The initialized BigInt value should be equal to 0.
   BigInt();
@@ -185,6 +188,9 @@ public:
 
 private:
   // TODO: add helper functions
+  static BigInt add_magnitudes(const BigInt& lhs, const BigInt& rhs);
+  static BigInt subtract_magnitudes(const BigInt& lhs, const BigInt& rhs);
+  static int compare_magnitudes(const BigInt& lhs, const BigInt& rhs);
 };
 
 #endif // BIGINT_H
