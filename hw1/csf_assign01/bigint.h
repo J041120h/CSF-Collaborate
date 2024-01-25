@@ -185,12 +185,15 @@ public:
   //!
   //! @return the value of this BigInt object in decimal (base-10)
   std::string to_dec() const;
-
-private:
+//private:
   // TODO: add helper functions
-  static BigInt add_magnitudes(const BigInt& lhs, const BigInt& rhs);
-  static BigInt subtract_magnitudes(const BigInt& lhs, const BigInt& rhs);
+  static BigInt add_magnitudes(const BigInt& lhs, const BigInt& rhs); //add the magnitude of two BigInt
+  static BigInt subtract_magnitudes(const BigInt& lhs, const BigInt& rhs); //get the absolute value of the difference of two BigInt's magnitude
   static int compare_magnitudes(const BigInt& lhs, const BigInt& rhs);
+  static std::vector<int> get_2power_sum(const BigInt& lhs); //given a BigInt, return 2 power representation representation
+  //e.g: a BigInt representing 41 will return (1, 3, 5), as 41 = 2 ^ 5 + 2 ^ 3 + 2 ^ 1
+  BigInt div_by_2() const; //always return positive
+  static BigInt divide_answer(const BigInt& lhs, const BigInt& rhs, BigInt lower, BigInt upper);
 };
 
 #endif // BIGINT_H
