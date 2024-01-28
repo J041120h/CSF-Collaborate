@@ -17,9 +17,9 @@ private:
   // TODO: add fields
   
   bool negative;
-
-public:
   std::vector<uint64_t> bit_string;
+  
+public:
   //! Default constructor.
   //! The initialized BigInt value should be equal to 0.
   BigInt();

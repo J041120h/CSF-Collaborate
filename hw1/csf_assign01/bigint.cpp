@@ -108,6 +108,9 @@ BigInt BigInt::operator-(const BigInt &rhs) const
 BigInt BigInt::operator-() const
 {
   // TODO: implement
+  if(*this == BigInt()){
+    return BigInt(*this);
+  }
   BigInt ans = *this;
   ans.negative = !(this->negative);
   return ans;
@@ -216,17 +219,29 @@ int BigInt::compare(const BigInt &rhs) const
 std::string BigInt::to_hex() const
 {
   // TODO: implement
+  if(*this == BigInt(0)){
+    std::string s = "0";
+    return s;
+  }
   std::stringstream ss;
   if(this->negative){
     ss << "-";
   }
+  bool all_zero = true;
   for(auto v = bit_string.rbegin(); v != bit_string.rend(); v++){
-    if(v == bit_string.rbegin()){
-      ss << std::hex << *v;
+    if(*v == 0 && all_zero){
+      continue;
     }
     else{
-      ss << std::hex << std::setfill('0') << std::setw(16) << *v;
+      if(all_zero){
+        ss << std::hex << *v;
+        all_zero = false;
+      }
+      else{
+        ss << std::hex << std::setfill('0') << std::setw(16) << *v;
+      } 
     }
+    
   }
   return ss.str();
 }
