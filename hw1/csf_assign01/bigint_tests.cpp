@@ -42,12 +42,15 @@ void test_add_1(TestObjs *objs);
 void test_add_2(TestObjs *objs);
 void test_add_3(TestObjs *objs);
 void test_add_4(TestObjs *objs);
+void test_add_5(TestObjs *objs);
 void test_sub_1(TestObjs *objs);
 void test_sub_2(TestObjs *objs);
 void test_sub_3(TestObjs *objs);
 void test_sub_4(TestObjs *objs);
+void test_sub_5(TestObjs *objs);
 void test_is_bit_set_1(TestObjs *objs);
 void test_is_bit_set_2(TestObjs *objs);
+void test_is_bit_set_3(TestObjs *objs);
 void test_lshift_1(TestObjs *objs);
 void test_lshift_2(TestObjs *objs);
 void test_mul_1(TestObjs *objs);
@@ -78,12 +81,15 @@ int main(int argc, char **argv) {
   TEST(test_add_2);
   TEST(test_add_3);
   TEST(test_add_4);
+  TEST(test_add_5);
   TEST(test_sub_1);
   TEST(test_sub_2);
   TEST(test_sub_3);
   TEST(test_sub_4);
+  TEST(test_sub_5);
   TEST(test_is_bit_set_1);
   TEST(test_is_bit_set_2);
+  TEST(test_is_bit_set_3);
   TEST(test_lshift_1);
   TEST(test_lshift_2);
   TEST(test_mul_1);
@@ -295,7 +301,21 @@ void test_add_4(TestObjs *) {
     check_contents(result, {0xb59e87ef7168ae78UL, 0xeda1de5b1d8a2999UL, 0x582fd87e1ac8af37UL, 0x5a15629c64224557UL, 0x3ec79d142be30f0UL, 0x33e531c4dbbd2d3dUL, 0x946004cdecfe6d47UL, 0x3e67713d575ed0b1UL, 0xcc7edfb347fcd8b4UL, 0x5978260d5ecf00a7UL, 0xe242586be49c40c1UL, 0xf734798ec1dd4ddaUL, 0x76394dUL});
     ASSERT(result.is_negative());
   }
+}
 
+void test_add_5(TestObjs *objs)
+{
+  BigInt left({0x94e439a254295b2fUL, 0xc02d6dc0be0efef4UL, 0xe5156c9d912b61f2UL,
+                    0xb82729123ce1051eUL, 0x1d2c69a0ed4011c3UL, 0xf13f35779fd54911UL,
+                    0x15056f71d40516eaUL, 0xdb571f43f9416bdeUL, 0x7e21086e7df7095UL,
+                    0x797275a8e7538b0aUL, 0x18a6284e20e7893aUL});
+  BigInt right({0x9161ea05eb48510dUL, 0xb7a476402ef52acaUL, 0xdf96be7a926695adUL,
+                    0x53e8bc19a9c14029UL, 0xf87ee595e422d5f0UL, 0x72dd209be1d990cbUL,
+                    0xb991581205507625UL, 0x77bbceb930f0c50eUL, 0x862b240a5ee05327UL,
+                    0x44af5ae70f9c63b6UL, 0x30UL});
+  BigInt result = left + right;
+  check_contents(result,{0x264623a83f71ac3cUL, 0x77d1e400ed0429bfUL,0xc4ac2b182391f7a0UL, 0xc0fe52be6a24548UL,0x15ab4f36d162e7b4UL, 0x641c561381aed9ddUL,0xce96c783d9558d10UL, 0x5312edfd2a3230ecUL,0x8e0d349146bfc3bdUL, 0xbe21d08ff6efeec0UL,0x18a6284e20e7896aUL});
+  ASSERT(!result.is_negative());
 }
 
 void test_sub_1(TestObjs *objs) {
@@ -359,6 +379,21 @@ void test_sub_4(TestObjs *) {
   }
 }
 
+void test_sub_5(TestObjs *objs)
+{
+  BigInt left({0x94e439a254295b2fUL, 0xc02d6dc0be0efef4UL, 0xe5156c9d912b61f2UL,
+                    0xb82729123ce1051eUL, 0x1d2c69a0ed4011c3UL, 0xf13f35779fd54911UL,
+                    0x15056f71d40516eaUL, 0xdb571f43f9416bdeUL, 0x7e21086e7df7095UL,
+                    0x797275a8e7538b0aUL, 0x18a6284e20e7893aUL});
+  BigInt right({0x9161ea05eb48510dUL, 0xb7a476402ef52acaUL, 0xdf96be7a926695adUL,
+                    0x53e8bc19a9c14029UL, 0xf87ee595e422d5f0UL, 0x72dd209be1d990cbUL,
+                    0xb991581205507625UL, 0x77bbceb930f0c50eUL, 0x862b240a5ee05327UL,
+                    0x44af5ae70f9c63b6UL, 0x30UL}, true);
+  BigInt result = left - right;
+  check_contents(result,{0x264623a83f71ac3cUL, 0x77d1e400ed0429bfUL,0xc4ac2b182391f7a0UL, 0xc0fe52be6a24548UL,0x15ab4f36d162e7b4UL, 0x641c561381aed9ddUL,0xce96c783d9558d10UL, 0x5312edfd2a3230ecUL,0x8e0d349146bfc3bdUL, 0xbe21d08ff6efeec0UL,0x18a6284e20e7896aUL});
+  ASSERT(!result.is_negative());
+}
+
 void test_is_bit_set_1(TestObjs *objs) {
   // some basic tests for is_bit_set
 
@@ -400,6 +435,28 @@ void test_is_bit_set_2(TestObjs *) {
     ASSERT(!val.is_bit_set(202));
     ASSERT(val.is_bit_set(241));
   }
+}
+
+void test_is_bit_set_3(TestObjs *objs)
+{
+  // Creating a BigInt object with randomly generated uint64_t values
+  BigInt val({
+  0xCCCCCCAB12AB12ABUL, // First part of the number
+  0x789ABCDEF0123456UL, // Second part
+  0x123456789ABCDEF0UL, // Third part
+  0xFEDCBA9876543210UL  // Fourth part
+  }, false);
+
+  ASSERT(val.is_bit_set(0));   // Should be true
+  ASSERT(val.is_bit_set(1));   // Should be true
+  ASSERT(!val.is_bit_set(2));  // Should be false
+  ASSERT(val.is_bit_set(3));   // Should be true
+  ASSERT(!val.is_bit_set(4));  // Should be false
+  ASSERT(val.is_bit_set(5));   // Should be true
+  ASSERT(!val.is_bit_set(6));  // Should be false
+  ASSERT(val.is_bit_set(7));   // Should be true
+  ASSERT(val.is_bit_set(63));  // Should be true
+
 }
 
 void test_lshift_1(TestObjs *objs) {
