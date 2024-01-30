@@ -53,6 +53,7 @@ void test_is_bit_set_2(TestObjs *objs);
 void test_is_bit_set_3(TestObjs *objs);
 void test_lshift_1(TestObjs *objs);
 void test_lshift_2(TestObjs *objs);
+void test_lshift_3(TestObjs *objs);
 void test_mul_1(TestObjs *objs);
 void test_mul_2(TestObjs *objs);
 void test_compare_1(TestObjs *objs);
@@ -92,6 +93,7 @@ int main(int argc, char **argv) {
   TEST(test_is_bit_set_3);
   TEST(test_lshift_1);
   TEST(test_lshift_2);
+  TEST(test_lshift_3);
   TEST(test_mul_1);
   TEST(test_mul_2);
   TEST(test_compare_1);
@@ -381,6 +383,7 @@ void test_sub_4(TestObjs *) {
 
 void test_sub_5(TestObjs *objs)
 {
+  //subtraction test with extremely large number
   BigInt left({0x94e439a254295b2fUL, 0xc02d6dc0be0efef4UL, 0xe5156c9d912b61f2UL,
                     0xb82729123ce1051eUL, 0x1d2c69a0ed4011c3UL, 0xf13f35779fd54911UL,
                     0x15056f71d40516eaUL, 0xdb571f43f9416bdeUL, 0x7e21086e7df7095UL,
@@ -415,7 +418,6 @@ void test_is_bit_set_1(TestObjs *objs) {
 void test_is_bit_set_2(TestObjs *) {
   // test(s) for is_bit_set: these test a random
   // sampling of bits in various large-ish BigInt values
-
   {
     BigInt val({0xad77cbed0273e33UL, 0xe151b7c18231a194UL, 0x7b2beb2888d66093UL, 0xeab20633a9a9595aUL});
     ASSERT(val.is_bit_set(0));
@@ -456,7 +458,9 @@ void test_is_bit_set_3(TestObjs *objs)
   ASSERT(!val.is_bit_set(6));  // Should be false
   ASSERT(val.is_bit_set(7));   // Should be true
   ASSERT(val.is_bit_set(63));  // Should be true
-
+  //exception test for get bits from a negative index
+  try{val.is_bit_set(-1);} // Should be an exception}
+  catch(std::runtime_error &e){ }
 }
 
 void test_lshift_1(TestObjs *objs) {
@@ -505,6 +509,18 @@ void test_lshift_2(TestObjs *) {
     check_contents(result, {0x0UL, 0x0UL, 0x0UL, 0x0UL, 0x0UL, 0x0UL, 0x4000000000000000UL, 0x87ca1c82cd5678c6UL, 0x524c995d549d6cbeUL, 0x655df71ecab97c37UL, 0x19523341dc8fd019UL, 0x1f9c1dd3486f16b3UL, 0xd7fe83598f38b19dUL, 0x3b77ae13ce121UL});
     ASSERT(!result.is_negative());
   }
+}
+
+void test_lshift_3(TestObjs *objs)
+{
+  //exception test for left shift a negative number
+  try{ objs->one << -1; }
+  catch(std::runtime_error &e){}
+  //test exactly moving 64a bits
+  BigInt val({0xdcc523fa26450fc3UL, 0x9490bb4c35ae6c03UL, 0x320a4f3349801bbeUL});
+  BigInt result = val << 128;
+  check_contents(result, {0x0UL, 0x0UL, 0xdcc523fa26450fc3UL, 0x9490bb4c35ae6c03UL, 0x320a4f3349801bbeUL});
+  ASSERT(!result.is_negative());
 }
 
 void test_mul_1(TestObjs *objs) {
