@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -191,6 +192,9 @@ BigInt BigInt::operator/(const BigInt &rhs) const
   }
   BigInt ans;
   ans = BigInt::divide_answer(labsolute, rabsolute, zero, labsolute);
+  if (ans == BigInt(uint64_t(0))){
+    return BigInt();
+  }
   if(this->negative != rhs.negative){
     ans.negative = true;
   }
