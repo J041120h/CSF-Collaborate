@@ -154,7 +154,7 @@ public:
 
   //! Compare two BigInt values, returning
   //!   - negative if lhs < rhs
-  //!   - 0 if lhs < rhs
+  //!   - 0 if lhs = rhs
   //!   - positive if lhs > rhs
   //!
   //! @param rhs the right-hand side BigInt value (the left hand value

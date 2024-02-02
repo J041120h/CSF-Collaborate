@@ -626,6 +626,8 @@ void test_div_3(TestObjs * objs) {
     ASSERT(result1.is_negative());
     check_contents(result2, {0UL});
     ASSERT(!result2.is_negative());
+    try{BigInt result = zero/zero;}
+    catch (std::invalid_argument &e){}
   }
 }
 
