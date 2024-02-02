@@ -64,6 +64,7 @@ void test_to_hex_1(TestObjs *objs);
 void test_to_hex_2(TestObjs *objs);
 void test_to_dec_1(TestObjs *objs);
 void test_to_dec_2(TestObjs *objs);
+void test_div_3(TestObjs *objs);
 // TODO: declare additional test functions
 
 int main(int argc, char **argv) {
@@ -104,6 +105,7 @@ int main(int argc, char **argv) {
   TEST(test_to_hex_2);
   TEST(test_to_dec_1);
   TEST(test_to_dec_2);
+  TEST(test_div_3);
   // TODO: add calls to TEST for additional test functions
 
   TEST_FINI();
@@ -537,6 +539,10 @@ void test_mul_1(TestObjs *objs) {
   BigInt result3 = objs->u64_max * objs->u64_max;
   check_contents(result3, { 0x0000000000000001UL, 0xFFFFFFFFFFFFFFFEUL });
   ASSERT(!result3.is_negative());
+
+  BigInt result4 = objs->zero * objs->two_pow_64;
+  check_contents(result4, {0UL});
+  ASSERT(!result4.is_negative());
 }
 
 void test_mul_2(TestObjs *) {
@@ -548,6 +554,10 @@ void test_mul_2(TestObjs *) {
     BigInt result = left * right;
     check_contents(result, {0x2bf1cf198f85396eUL, 0x92c5b43447ed673fUL, 0xbb463828efUL});
     ASSERT(!result.is_negative());
+    BigInt negative = -right;
+    BigInt result1 = left * negative;
+    check_contents(result1, {0x2bf1cf198f85396eUL, 0x92c5b43447ed673fUL, 0xbb463828efUL});
+    ASSERT(result1.is_negative());
   }
 }
 
@@ -601,6 +611,21 @@ void test_div_2(TestObjs *) {
     BigInt result = left / right;
     check_contents(result, {0xfb3e6b02be39b6ceUL, 0x25UL});
     ASSERT(!result.is_negative());
+  }
+}
+
+void test_div_3(TestObjs * objs) {
+
+  {
+    BigInt left({0x8138b833ea495613UL, 0xf19af3887dd29240UL, 0x1d55bea1eUL}, true);
+    BigInt right({0x1ca534bf5dda52eeUL, 0x43cd5fbc87b6cf5UL});
+    BigInt result1 = left / right;
+    BigInt zero;
+    BigInt result2 = zero / left;
+    check_contents(result1, {0x6ec270bec2UL});
+    ASSERT(result1.is_negative());
+    check_contents(result2, {0UL});
+    ASSERT(!result2.is_negative());
   }
 }
 
