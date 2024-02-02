@@ -383,7 +383,7 @@ BigInt BigInt::div_by_2() const{
 
 BigInt BigInt::divide_answer(const BigInt& lhs, const BigInt& rhs, BigInt lower, BigInt upper){ //helper function
   BigInt one(1, false);
-  if(upper == lower || upper - lower == one){ //terminate condition for recursion
+  if(upper - lower == one){ //terminate condition for recursion
     return lower; 
   }
   BigInt temp = lower + upper;
