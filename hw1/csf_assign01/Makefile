@@ -30,7 +30,8 @@ clean :
 # Generate header file dependencies
 depend :
 	$(CXX) $(CXXFLAGS) -M $(CXX_SRCS) > depend.mak
-	$(CC) $(CFLAGS) -M $(C_SRCS) >> depend.mak
+	$(CC) $(CFLAGS) -M $(C_SRCS) >> d
+	epend.mak
 
 depend.mak :
 	touch $@
