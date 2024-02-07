@@ -15,7 +15,7 @@ int32_t in_bounds(struct Image *img, int32_t x, int32_t y){
   return clamp(x, 0, img->width) && (clamp(y, 0, img->height));
 }
 uint32_t compute_index(struct Image *img, int32_t x, int32_t y){
-  return x * (img->width) + y;
+  return y * (img->width) + x;
 }
 int32_t clamp(int32_t val, int32_t min, int32_t max){
   return min < val && val < max;
@@ -46,7 +46,7 @@ uint32_t blend_colors(uint32_t fg, uint32_t bg){
   return red << 24 + green << 16 + blue << 8 + 255;
 }
 void set_pixel(struct Image *img, uint32_t index, uint32_t color) {
-  img->data[index] = color;
+  img->data[index] = blend_colors(img->data[index], color);
 }
 int64_t square(int64_t x) {
   return x*x;
@@ -70,7 +70,7 @@ int64_t square_dist(int64_t x1, int64_t y1, int64_t x2, int64_t y2) {
 //
 void draw_pixel(struct Image *img, int32_t x, int32_t y, uint32_t color) {
   // TODO: implement
-  uint32_t index = img->width*x +y;
+  uint32_t index = img->width*y + x;
   set_pixel(img, index, color);
 }
 
@@ -140,6 +140,16 @@ void draw_tile(struct Image *img,
                struct Image *tilemap,
                const struct Rect *tile) {
  // TODO: implement
+  for(int i = 0; i < tile->width; i++){
+    for(int j = 0; j < tile->height; j++){
+      if(!in_bounds(tilemap, tile->x + i, tile->y + j) || !in_bounds(img, x + i, y + j)){
+        continue;
+      }
+      uint32_t copy_index = compute_index(tilemap, tile->x + i, tile->y + j);
+      uint32_t index = compute_index(img, x + i, y + j);
+      img->data[index] = tilemap->data[copy_index];
+    }
+ }
 }
 
 //
@@ -162,4 +172,13 @@ void draw_sprite(struct Image *img,
                  struct Image *spritemap,
                  const struct Rect *sprite) {
   // TODO: implement
+  for(int i = 0; i < sprite->width; i++){
+    for(int j = 0; j < sprite->height; j++){
+      if(!in_bounds(spritemap, sprite->x + i, sprite->y + j) || !in_bounds(img, x + i, y + j)){
+        continue;
+      }
+      uint32_t copy_index = compute_index(sprite, sprite->x + i, sprite->y + j);
+      draw_pixel(img, x + i, y + j, spritemap->data[copy_index]);
+    }
+ }
 }
