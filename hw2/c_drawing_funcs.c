@@ -11,9 +11,15 @@
 ////////////////////////////////////////////////////////////////////////
 
 // TODO: implement helper functions
-int32_t in_bounds(struct Image *img, int32_t x, int32_t y);
-uint32_t compute_index(struct Image *img, int32_t x, int32_t y);
-int32_t clamp(int32_t val, int32_t min, int32_t max);
+int32_t in_bounds(struct Image *img, int32_t x, int32_t y){
+  return clamp(x, 0, img->width) && (clamp(y, 0, img->height));
+}
+uint32_t compute_index(struct Image *img, int32_t x, int32_t y){
+  return x * (img->width) + y;
+}
+int32_t clamp(int32_t val, int32_t min, int32_t max){
+  return min < val && val < max;
+}
 uint8_t get_r(uint32_t color) {
   return color >> 24;
 }
@@ -29,8 +35,16 @@ uint8_t get_a(uint32_t color) {
   color = color << 24;
   return color >> 24;
 }
-uint8_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha);
-uint32_t blend_colors(uint32_t fg, uint32_t bg);
+uint8_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha){
+  return (alpha * fg + (255 - alpha) * bg) / 255;
+}
+uint32_t blend_colors(uint32_t fg, uint32_t bg){
+  uint32_t alpha = get_a(fg);
+  uint32_t red = blend_components(get_r(fg), get_r(bg), alpha);
+  uint32_t green = blend_components(get_g(fg), get_g(bg), alpha);
+  uint32_t blue = blend_components(get_b(fg), get_b(bg), alpha);
+  return red << 24 + green << 16 + blue << 8 + 255;
+}
 void set_pixel(struct Image *img, uint32_t index, uint32_t color) {
   img->data[index] = color;
 }
