@@ -88,6 +88,13 @@ void draw_rect(struct Image *img,
                const struct Rect *rect,
                uint32_t color) {
   // TODO: implement
+  uint32_t initial = rect->y*img->width + rect->x; 
+  for (int a = 0; a < rect->height; a++) {
+    for (int b = 0; b <rect->width; b++) {
+      set_pixel(img, initial+b, color);
+    }
+    initial += img->width;
+  }
 }
 
 //
@@ -105,6 +112,13 @@ void draw_circle(struct Image *img,
                  int32_t x, int32_t y, int32_t r,
                  uint32_t color) {
   // TODO: implement
+  for (int a = 0; a < img->height; a++) {
+    for (int b = 0; b < img->width; b++) {
+      if (square_dist(x, y, a, b)) {
+        draw_pixel(img, a, b, color);
+      }
+    }
+  }
 }
 
 //
