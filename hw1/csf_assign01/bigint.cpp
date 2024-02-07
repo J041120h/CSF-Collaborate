@@ -177,7 +177,7 @@ BigInt BigInt::operator/(const BigInt &rhs) const
   // TODO: implement
   BigInt zero;
   if(rhs == zero){
-    throw std::invalid_argument("Attempt to divide by 0");
+    throw std::invalid_argument("");
   }
   BigInt labsolute;
   labsolute = *this;

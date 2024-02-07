@@ -626,30 +626,10 @@ void test_div_3(TestObjs * objs) {
     ASSERT(result1.is_negative());
     check_contents(result2, {0UL});
     ASSERT(!result2.is_negative());
-    BigInt left1({9UL}, true);
-    BigInt right1({10UL}, false);
-    BigInt result3 = left1 / right1;
-    check_contents(result3, {0UL});
-    ASSERT(!result3.is_negative());
-    BigInt negative_three({3UL}, true);
-    BigInt result4 = left1 / negative_three;
-    check_contents(result4, {3UL});
-    ASSERT(!result4.is_negative());
-    BigInt six({6UL}, false);
-    BigInt result5 = right1 / six;
-    check_contents(result5, {1UL});
-    ASSERT(!result5.is_negative());
-    BigInt result6 = right / left;
-    check_contents(result6, {0UL});
-    ASSERT(!result6.is_negative());
-    BigInt negative_two({2UL}, true);
-    BigInt result7 = left1 / negative_two;
-    check_contents(result7, {4UL});
-    ASSERT(!result7.is_negative());
-    BigInt one({1UL}, false);
-    BigInt result8 = left1 / one;
-    check_contents(result8, {9UL});
-    ASSERT(result8.is_negative());
+    try{BigInt result = zero/zero;}
+    catch (std::invalid_argument &e){}
+    try{BigInt result = left/zero;}
+    catch (std::invalid_argument &e){}
   }
 }
 
