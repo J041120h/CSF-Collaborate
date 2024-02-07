@@ -328,13 +328,13 @@ int BigInt::compare_magnitudes(const BigInt& lhs, const BigInt& rhs){
   int lsize = lhs.bit_string.size();
   int rsize = rhs.bit_string.size();
   for(auto v = lhs.bit_string.rbegin(); v != lhs.bit_string.rend(); v++){ //remove consecutive 0s in most significant bit
-    if(*v != 0){
+    if(*v != 0 && v != lhs.bit_string.rend()++){
       break;  //if encountering non-zero term, stop
     }
     lsize--;
   }
   for(auto v = rhs.bit_string.rbegin(); v != rhs.bit_string.rend(); v++){
-    if(*v != 0){
+    if(*v != 0 && v != rhs.bit_string.rend()++){
       break;
     }
     rsize--;
@@ -384,6 +384,9 @@ BigInt BigInt::div_by_2() const{
 BigInt BigInt::divide_answer(const BigInt& lhs, const BigInt& rhs, BigInt lower, BigInt upper){ //helper function
   BigInt one(1, false);
   if(upper - lower == one){ //terminate condition for recursion
+    if(upper * rhs == lhs){
+      return upper;
+    }
     return lower; 
   }
   BigInt temp = lower + upper;
