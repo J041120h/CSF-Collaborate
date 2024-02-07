@@ -1,6 +1,7 @@
 // C implementations of drawing functions (and helper functions)
 
 #include <assert.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "drawing_funcs.h"
@@ -55,6 +56,8 @@ int64_t square_dist(int64_t x1, int64_t y1, int64_t x2, int64_t y2) {
 //
 void draw_pixel(struct Image *img, int32_t x, int32_t y, uint32_t color) {
   // TODO: implement
+  uint32_t index = img->width*x +y;
+  set_pixel(img, index, color);
 }
 
 //
