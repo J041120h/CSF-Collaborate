@@ -89,9 +89,10 @@ void test_draw_circle_clip(TestObjs *objs);
 void test_draw_tile(TestObjs *objs);
 void test_draw_sprite(TestObjs *objs);
 void test_getr(TestObjs *objs);
-void test_getg(TestObjs *objs)
-void test_getb(TestObjs *objs)
-void test_geta(TestObjs *objs)
+void test_getg(TestObjs *objs);
+void test_getb(TestObjs *objs);
+void test_geta(TestObjs *objs);
+void test_blend_colors(TestObjs *objs);
 
 int main(int argc, char **argv) {
   if (argc > 1) {
@@ -106,7 +107,6 @@ int main(int argc, char **argv) {
   TEST(test_in_bounds);
   TEST(test_compute_index);
   TEST(test_square);
-
   TEST(test_draw_pixel);
   TEST(test_draw_rect);
   TEST(test_draw_circle);
@@ -117,6 +117,7 @@ int main(int argc, char **argv) {
   TEST(test_getg);
   TEST(test_getb);
   TEST(test_geta);
+  TEST(test_blend_colors);
 
   TEST_FINI();
 }
@@ -154,25 +155,40 @@ void test_square(TestObjs *objs) {
 
 void test_getr(TestObjs *objs) {
   uint32_t color1 = 0xFF000000U;
+  uint32_t color2 = 0x01010101U;
+  ASSERT(get_r(color2) == 0x00000001U);  
   ASSERT(get_r(color1) == 0x000000FFU);
 }
 
 void test_getg(TestObjs *objs) {
   uint32_t color1 = 0x00FF0000U;
+  uint32_t color2 = 0x01010101U;
+  ASSERT(get_g(color2) == 0x00000001U);
   ASSERT(get_g(color1) == 0x000000FFU);
 }
 
 void test_getb(TestObjs *objs) {
   uint32_t color1 = 0x0000FF00U;
+  uint32_t color2 = 0x01010101U;
+  ASSERT(get_b(color2) == 0x00000001U);
   ASSERT(get_b(color1) == 0x000000FFU);
 }
 
 void test_geta(TestObjs *objs) {
   uint32_t color1 = 0xFF0000FFU;
+  uint32_t color2 = 0x01010101U;
+  ASSERT(get_a(color2) == 0x00000001U);
   ASSERT(get_a(color1) == 0x000000FFU);
 }
 
-
+void test_blend_colors(TestObjs *objs) {
+  uint32_t color1 = 0x3f3f3f3fU;
+  uint32_t color2 = 0x5f5f5f5fU;
+  ASSERT(blend_components(get_b(color1), get_b(color2), get_a(color1)) == 0x00000057U);
+  ASSERT(blend_components(get_g(color1), get_g(color2), get_a(color1)) == 0x00000057U);
+  ASSERT(blend_components(get_r(color1), get_r(color2), get_a(color1)) == 0x00000057U);
+  ASSERT(blend_colors(color1, color2) == 0x575757FFU);
+}
 
 void test_draw_pixel(TestObjs *objs) {
   // initially objs->small pixels are opaque black
