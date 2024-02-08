@@ -93,7 +93,7 @@ void draw_rect(struct Image *img,
   uint32_t initial = rect->y*img->width + rect->x; 
   for (int a = 0; a < rect->height; a++) {
     for (int b = 0; b <rect->width; b++) {
-      set_pixel(img, initial+b, color);
+      draw_pixel(img, rect->x + b, rect->y + a, color);
     }
     initial += img->width;
   }
