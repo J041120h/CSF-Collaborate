@@ -46,7 +46,7 @@ uint32_t blend_colors(uint32_t fg, uint32_t bg){
   return (red << 24) + (green << 16) + (blue << 8) + 255;
 }
 void set_pixel(struct Image *img, uint32_t index, uint32_t color) {
-  img->data[index] = blend_colors(img->data[index], color);
+  img->data[index] = blend_colors(color, img->data[index]);
 }
 int64_t square(int64_t x) {
   return x*x;
