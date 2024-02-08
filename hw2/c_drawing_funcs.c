@@ -114,8 +114,8 @@ void draw_circle(struct Image *img,
                  int32_t x, int32_t y, int32_t r,
                  uint32_t color) {
   // TODO: implement
-  for (int a = 0; a < img->height; a++) {
-    for (int b = 0; b < img->width; b++) {
+  for (int a = 0; a <= img->width; a++) {
+    for (int b = 0; b <= img->height; b++) {
       if (square_dist(x, y, a, b) <= square(r)) {
         draw_pixel(img, a, b, color);
       }
