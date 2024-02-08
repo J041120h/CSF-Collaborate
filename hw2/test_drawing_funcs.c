@@ -77,6 +77,11 @@ void check_picture(struct Image *img, Picture *p) {
 }
 
 // prototypes of test functions
+void test_clamp(TestObjs *objs);
+void test_in_bounds(TestObjs *objs);
+void test_compute_index(TestObjs *objs);
+void test_square(TestObjs *objs);
+
 void test_draw_pixel(TestObjs *objs);
 void test_draw_rect(TestObjs *objs);
 void test_draw_circle(TestObjs *objs);
@@ -93,6 +98,11 @@ int main(int argc, char **argv) {
   TEST_INIT();
 
   // TODO: add TEST() directives for your helper functions
+  TEST(test_clamp);
+  TEST(test_in_bounds);
+  TEST(test_compute_index);
+  TEST(test_square);
+
   TEST(test_draw_pixel);
   TEST(test_draw_rect);
   TEST(test_draw_circle);
@@ -101,6 +111,37 @@ int main(int argc, char **argv) {
   TEST(test_draw_sprite);
 
   TEST_FINI();
+}
+
+void test_clamp(TestObjs *objs) {
+  ASSERT(clamp(2, 0, 3));
+  ASSERT(!clamp(-2, 0, 3));
+}
+
+void test_in_bounds(TestObjs *objs) {
+  ASSERT(in_bounds(&objs->small, 1, 1));
+  ASSERT(in_bounds(&objs->small, 5, 4));
+  ASSERT(in_bounds(&objs->small, 0, 0));
+
+  ASSERT(!in_bounds(&objs->small, -1, 1));
+  ASSERT(!in_bounds(&objs->small, 1, -1));
+  ASSERT(!in_bounds(&objs->small, 9, 1));
+  ASSERT(!in_bounds(&objs->small, 1, 9));
+  ASSERT(!in_bounds(&objs->small, 1, 9));
+  ASSERT(!in_bounds(&objs->small, 6, 8));
+
+}
+
+void test_compute_index(TestObjs *objs) {
+  ASSERT(compute_index(&objs->small, 0, 0) == 0);
+  ASSERT(compute_index(&objs->small, 1, 0) == 1);
+  ASSERT(compute_index(&objs->small, 0, 1) == 8);
+  ASSERT(compute_index(&objs->small, 1, 1) == 9);
+  ASSERT(compute_index(&objs->small, 3, 3) == 27);
+}
+
+void test_square(TestObjs *objs) {
+  
 }
 
 void test_draw_pixel(TestObjs *objs) {
