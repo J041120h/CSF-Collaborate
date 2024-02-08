@@ -43,7 +43,7 @@ uint32_t blend_colors(uint32_t fg, uint32_t bg){
   uint32_t red = blend_components(get_r(fg), get_r(bg), alpha);
   uint32_t green = blend_components(get_g(fg), get_g(bg), alpha);
   uint32_t blue = blend_components(get_b(fg), get_b(bg), alpha);
-  return red << 24 + green << 16 + blue << 8 + 255;
+  return (red << 24) + (green << 16) + (blue << 8) + 255;
 }
 void set_pixel(struct Image *img, uint32_t index, uint32_t color) {
   img->data[index] = blend_colors(img->data[index], color);
@@ -177,7 +177,7 @@ void draw_sprite(struct Image *img,
       if(!in_bounds(spritemap, sprite->x + i, sprite->y + j) || !in_bounds(img, x + i, y + j)){
         continue;
       }
-      uint32_t copy_index = compute_index(sprite, sprite->x + i, sprite->y + j);
+      uint32_t copy_index = compute_index(spritemap, sprite->x + i, sprite->y + j);
       draw_pixel(img, x + i, y + j, spritemap->data[copy_index]);
     }
  }
