@@ -83,6 +83,10 @@ void test_draw_circle(TestObjs *objs);
 void test_draw_circle_clip(TestObjs *objs);
 void test_draw_tile(TestObjs *objs);
 void test_draw_sprite(TestObjs *objs);
+void test_getr(TestObjs *objs);
+void test_getg(TestObjs *objs)
+void test_getb(TestObjs *objs)
+void test_geta(TestObjs *objs)
 
 int main(int argc, char **argv) {
   if (argc > 1) {
@@ -99,9 +103,35 @@ int main(int argc, char **argv) {
   TEST(test_draw_circle_clip);
   TEST(test_draw_tile);
   TEST(test_draw_sprite);
+  TEST(test_getr);
+  TEST(test_getg);
+  TEST(test_getb);
+  TEST(test_geta);
 
   TEST_FINI();
 }
+
+void test_getr(TestObjs *objs) {
+  uint32_t color1 = 0xFF000000U;
+  ASSERT(get_r(color1) == 0x000000FFU);
+}
+
+void test_getg(TestObjs *objs) {
+  uint32_t color1 = 0x00FF0000U;
+  ASSERT(get_g(color1) == 0x000000FFU);
+}
+
+void test_getb(TestObjs *objs) {
+  uint32_t color1 = 0x0000FF00U;
+  ASSERT(get_b(color1) == 0x000000FFU);
+}
+
+void test_geta(TestObjs *objs) {
+  uint32_t color1 = 0xFF0000FFU;
+  ASSERT(get_a(color1) == 0x000000FFU);
+}
+
+
 
 void test_draw_pixel(TestObjs *objs) {
   // initially objs->small pixels are opaque black
