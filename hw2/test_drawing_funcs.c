@@ -81,6 +81,7 @@ void test_clamp(TestObjs *objs);
 void test_in_bounds(TestObjs *objs);
 void test_compute_index(TestObjs *objs);
 void test_square(TestObjs *objs);
+void test_square_dist(TestObjs *objs);
 
 void test_draw_pixel(TestObjs *objs);
 void test_draw_rect(TestObjs *objs);
@@ -89,9 +90,9 @@ void test_draw_circle_clip(TestObjs *objs);
 void test_draw_tile(TestObjs *objs);
 void test_draw_sprite(TestObjs *objs);
 void test_getr(TestObjs *objs);
-void test_getg(TestObjs *objs);
-void test_getb(TestObjs *objs);
-void test_geta(TestObjs *objs);
+void test_getg(TestObjs *objs);;
+void test_getb(TestObjs *objs);;
+void test_geta(TestObjs *objs);;
 void test_blend_colors(TestObjs *objs);
 
 int main(int argc, char **argv) {
@@ -107,6 +108,7 @@ int main(int argc, char **argv) {
   TEST(test_in_bounds);
   TEST(test_compute_index);
   TEST(test_square);
+  TEST(test_square_dist);
   TEST(test_draw_pixel);
   TEST(test_draw_rect);
   TEST(test_draw_circle);
@@ -150,7 +152,21 @@ void test_compute_index(TestObjs *objs) {
 }
 
 void test_square(TestObjs *objs) {
-  
+  ASSERT(square(1) == 1);
+  ASSERT(square(-1) == 1);
+  ASSERT(square(2) == 4);
+  ASSERT(square(-2) == 4);
+  ASSERT(square(8) == 64);
+  ASSERT(square(10) == 100);
+}
+
+void test_square_dist(TestObjs *objs) {
+  ASSERT(square_dist(0, 0, 0, 0) == 0);
+  ASSERT(square_dist(0, 0, 1, 1) == 2);
+  ASSERT(square_dist(0, 0, 2, 3) == 13);
+  ASSERT(square_dist(1, 2, 1, 2) == 0);
+  ASSERT(square_dist(1, 2, 0, 0) == 5);
+  ASSERT(square_dist(1, 2, 10, 12) == 181);
 }
 
 void test_getr(TestObjs *objs) {
