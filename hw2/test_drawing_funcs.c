@@ -171,39 +171,39 @@ void test_square_dist(TestObjs *objs) {
 
 void test_getr(TestObjs *objs) {
   uint32_t color1 = 0xFF000000U;
-  uint32_t color2 = 0x01010101U;
-  ASSERT(get_r(color2) == 0x00000001U);  
+  uint32_t color2 = 0xFA010101U;
+  ASSERT(get_r(color2) == 0x000000FAU);  
   ASSERT(get_r(color1) == 0x000000FFU);
 }
 
 void test_getg(TestObjs *objs) {
   uint32_t color1 = 0x00FF0000U;
-  uint32_t color2 = 0x01010101U;
-  ASSERT(get_g(color2) == 0x00000001U);
+  uint32_t color2 = 0x01FA0101U;
+  ASSERT(get_g(color2) == 0x000000FAU);
   ASSERT(get_g(color1) == 0x000000FFU);
 }
 
 void test_getb(TestObjs *objs) {
   uint32_t color1 = 0x0000FF00U;
-  uint32_t color2 = 0x01010101U;
-  ASSERT(get_b(color2) == 0x00000001U);
+  uint32_t color2 = 0x0101FA01U;
+  ASSERT(get_b(color2) == 0x000000FAU);
   ASSERT(get_b(color1) == 0x000000FFU);
 }
 
 void test_geta(TestObjs *objs) {
   uint32_t color1 = 0xFF0000FFU;
-  uint32_t color2 = 0x01010101U;
-  ASSERT(get_a(color2) == 0x00000001U);
+  uint32_t color2 = 0x01010187U;
+  ASSERT(get_a(color2) == 0x00000087U);
   ASSERT(get_a(color1) == 0x000000FFU);
 }
 
 void test_blend_colors(TestObjs *objs) {
-  uint32_t color1 = 0x3f3f3f3fU;
-  uint32_t color2 = 0x5f5f5f5fU;
-  ASSERT(blend_components(get_b(color1), get_b(color2), get_a(color1)) == 0x00000057U);
-  ASSERT(blend_components(get_g(color1), get_g(color2), get_a(color1)) == 0x00000057U);
+  uint32_t color1 = 0x3f4f5f3fU;
+  uint32_t color2 = 0x5f6f7f5fU;
   ASSERT(blend_components(get_r(color1), get_r(color2), get_a(color1)) == 0x00000057U);
-  ASSERT(blend_colors(color1, color2) == 0x575757FFU);
+  ASSERT(blend_components(get_g(color1), get_g(color2), get_a(color1)) == 0x00000067U);
+  ASSERT(blend_components(get_b(color1), get_b(color2), get_a(color1)) == 0x00000077U);
+  ASSERT(blend_colors(color1, color2) == 0x576777FFU);
 }
 
 void test_draw_pixel(TestObjs *objs) {
