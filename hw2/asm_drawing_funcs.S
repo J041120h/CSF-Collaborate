@@ -43,28 +43,28 @@ in_bounds:
 	pushq %r14
 
 	/*save input in these three registers*/
-	movq %rdi, %r12
-	movq %rsi, %r13
-	movq %rdx, %r14
+	movl %edi, %r12d
+	movl %esi, %r13d
+	movl %edx, %r14d
 
 	/*test if the x coordinate is within the range*/
-	movq %r13, %rdi	/*move the x coordinate into rdi*/
-	movq $0, %rsi	/*move the 0 to %rsi as the min*/
-	movq IMAGE_WIDTH_OFFSET(%r12), %rdx	/*move the width into rdx as the max*/
+	movl %r13d, %edi	/*move the x coordinate into rdi*/
+	movl $0, %esi	/*move the 0 to %rsi as the min*/
+	movl IMAGE_WIDTH_OFFSET(%r12), %edx	/*move the width into rdx as the max*/
 	call clamp
-	movq %rax, %r10 /*save the result in %r10*/
+	movl %eax, %r10d /*save the result in %r10*/
 
 	/*test if the y coordinate is within the range*/
-	movq %r14, %rdi	/*move the y coordinate into rdi*/
-	movq $0, %rsi	/*move the 0 to %rsi as the min*/
-	movq IMAGE_HEIGHT_OFFSET(%r12), %rdx	/*move the height into rdx as the max*/
+	movl %r14d, %edi	/*move the y coordinate into rdi*/
+	movl $0, %esi	/*move the 0 to %rsi as the min*/
+	movl IMAGE_HEIGHT_OFFSET(%r12), %edx	/*move the height into rdx as the max*/
 	call clamp
-	add %rax, %r10 /*add the result to %r10*/
+	addl %eax, %r10d /*add the result to %r10*/
 
 	/*compare the result, %r10 should contains 2 if both conditions are met and less than 2 if otherwise*/
-	movq $2, %r11
-	cmp %r10, %r11
-	movq $1, %rax	/*restore the rax*/
+	movl $2, %r11d
+	cmpl %r10d, %r11d
+	movl $1, %eax	/*restore the rax*/
 	ja .Lout
 
 	/*retore the value in the three register and retun the value*/
@@ -83,6 +83,14 @@ in_bounds:
 
 	.globl compute_index
 compute_index:
+	// %rdi   pointer to a struct Image
+	// %esi   x coordinate
+	// %edx   y coordinate
+
+	movl %edx, %eax   //put the value of y into %eax
+	movl IMAGE_WIDTH_OFFSET(%rdi), %r10d //put the value of image width into r10d
+	imull %r10d, %eax
+	addl %esi, %eax
 	ret
 
 /*
@@ -99,20 +107,20 @@ compute_index:
 	.globl clamp
 clamp:
 	/*Set the default value of %rax as true*/
-	movq $1, %rax
+	movl $1, %eax
 
 	/*Compare the value with the min*/
-	cmp %rdi, %rsi
-	jg .Ltest
+	cmpl %esi, %edi
+	jl .Ltest
 
 	/*Compare the value with the max*/
-	cmp %rdx, %rdi
-	jge .Ltest
+	cmpl %edi, %edx
+	jle .Ltest
 
 	ret
 
 .Ltest:
-	movq $0, %rax
+	movl $0, %eax
 	ret
 
 	.globl get_r
@@ -258,6 +266,20 @@ blend_colors:
 
 	.globl set_pixel
 set_pixel:
+	//%rdi    pointer to a image
+	//%esi    index to change
+	//%edx     color to put in
+	pushq %r12
+	pushq %r13
+	movl %esi, %r12d   //store the index to %r12
+	movl IMAGE_DATA_OFFSET(%rdi), %r13d  //put address of image->data to r13
+	movl (%r13d, %r12d, 4), %esi
+	movl %edx, %esi
+	call blend_colors
+	movl %eax, (%r13d, %r12d, 4)
+
+	popq %r13
+	popq %r12
 	ret
 
 /* 
@@ -329,6 +351,31 @@ square_dist:
 	.globl draw_pixel
 draw_pixel:
 	/* TODO: implement */
+	pushq %r12
+	pushq %r13
+	pushq %r14
+	pushq %r15
+	movq %rdi, %r12   //put the pointer to r12
+	movl %esi, %r13d
+	movl %edx, %r14d
+	movl %ecx, %r15d
+	call in_bounds
+	cmpl $0, %eax
+	je .Lreturn
+	movq %r12, %rdi
+	movl %r13d, %esi
+	movl %r14d, %edx
+	call compute_index
+	movl %eax, %esi
+	movq %r12, %rdi
+	movl %r15d, %edx
+	call set_pixel 
+
+.Lreturn:
+	popq %r15
+	popq %r14
+	popq %r13
+	popq %r12
 	ret
 
 
