@@ -268,15 +268,19 @@ blend_colors:
 set_pixel:
 	//%rdi    pointer to a image
 	//%esi    index to change
-	//%edx     color to put in
+	//%edx    color to put in
+	//%r12    index value
+	//%r13    address of image->data
+
+
 	pushq %r12
 	pushq %r13
 	movl %esi, %r12d   //store the index to %r12
 	movl IMAGE_DATA_OFFSET(%rdi), %r13d  //put address of image->data to r13
-	movl (%r13d, %r12d, 4), %esi
-	movl %edx, %esi
+	movl (%r13d, %r12d, 4), %esi  //put the current color value in image to %esi (second argument)
+	movl %edx, %edi   //set the first argument
 	call blend_colors
-	movl %eax, (%r13d, %r12d, 4)
+	movl %eax, (%r13d, %r12d, 4)   //move the blended color to the memory position
 
 	popq %r13
 	popq %r12
@@ -346,7 +350,11 @@ square_dist:
  *   %rdi     - pointer to struct Image
  *   %esi     - x coordinate (pixel column)
  *   %edx     - y coordinate (pixel row)
- *   %ecx     - uint32_t color value
+ *   %ecx     - uint32_t color value 
+ *   %r12     - pointer of image
+ *   %r13     - x-coordinate
+ *   %r14     - y-coordinate
+ *   %r15     - color value to be put
  */
 	.globl draw_pixel
 draw_pixel:
@@ -356,17 +364,17 @@ draw_pixel:
 	pushq %r14
 	pushq %r15
 	movq %rdi, %r12   //put the pointer to r12
-	movl %esi, %r13d
-	movl %edx, %r14d
-	movl %ecx, %r15d
+	movl %esi, %r13d  //put x coordinate
+	movl %edx, %r14d  //put y coordinate
+	movl %ecx, %r15d  //put color
 	call in_bounds
 	cmpl $0, %eax
-	je .Lreturn
-	movq %r12, %rdi
+	je .Lreturn   //jump is ! inbounds
+	movq %r12, %rdi 
 	movl %r13d, %esi
-	movl %r14d, %edx
+	movl %r14d, %edx  //set up argument to compute the index
 	call compute_index
-	movl %eax, %esi
+	movl %eax, %esi  //index is the second argument
 	movq %r12, %rdi
 	movl %r15d, %edx
 	call set_pixel 
