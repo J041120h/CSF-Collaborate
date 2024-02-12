@@ -127,6 +127,9 @@ int main(int argc, char **argv) {
 void test_clamp(TestObjs *objs) {
   ASSERT(clamp(2, 0, 3));
   ASSERT(!clamp(-2, 0, 3));
+  ASSERT(!clamp(-1, 0, 3));
+  ASSERT(!clamp(3, 0, 3));
+  ASSERT(!clamp(4, 0, 3));
 }
 
 void test_in_bounds(TestObjs *objs) {

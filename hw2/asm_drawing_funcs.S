@@ -23,16 +23,96 @@
 
 /* TODO: implement your helper functions here */
 
+/*
+ * Return whether the point is within the range of the image
+ *
+ * Parameters:
+ * 	%rdi - a pointer to the image
+ * 	%rsi - the x coordinate of the point
+ *	%rdx - the y coordinate of the point
+ *
+ * Return: (in %rax)
+ *	A int32_t that is 0 if the point is not in the range and 1 if otherwise 
+ */
+
 	.globl in_bounds
 in_bounds:
+	/*save three register for future use and also align the stack frame*/
+	pushq %r12
+	pushq %r13
+	pushq %r14
+
+	/*save input in these three registers*/
+	movq %rdi, %r12
+	movq %rsi, %r13
+	movq %rdx, %r14
+
+	/*test if the x coordinate is within the range*/
+	movq %r13, %rdi	/*move the x coordinate into rdi*/
+	movq $0, %rsi	/*move the 0 to %rsi as the min*/
+	movq IMAGE_WIDTH_OFFSET(%r12), %rdx	/*move the width into rdx as the max*/
+	call clamp
+	movq %rax, %r10 /*save the result in %r10*/
+
+	/*test if the y coordinate is within the range*/
+	movq %r14, %rdi	/*move the y coordinate into rdi*/
+	movq $0, %rsi	/*move the 0 to %rsi as the min*/
+	movq IMAGE_HEIGHT_OFFSET(%r12), %rdx	/*move the height into rdx as the max*/
+	call clamp
+	add %rax, %r10 /*add the result to %r10*/
+
+	/*compare the result, %r10 should contains 2 if both conditions are met and less than 2 if otherwise*/
+	movq $2, %r11
+	cmp %r10, %r11
+	movq $1, %rax	/*restore the rax*/
+	ja .Lout
+
+	/*retore the value in the three register and retun the value*/
+	popq %r14
+	popq %r13
+	popq %r12
 	ret
+	
+.Lout:
+	movq $0, %rax
+	popq %r14
+	popq %r13
+	popq %r12
+	ret
+	
 
 	.globl compute_index
 compute_index:
 	ret
 
+/*
+ * Return whether the value is min <= value < max
+ *
+ * Parameters:
+ * 	%rdi - input value for comparision
+ * 	%rsi - min
+ *	%rdx - max
+ *
+ * Return: (in %rax)
+ *	A int32_t that is 0 if the value is not in the range and 1 if otherwise 
+ */
 	.globl clamp
 clamp:
+	/*Set the default value of %rax as true*/
+	movq $1, %rax
+
+	/*Compare the value with the min*/
+	cmp %rdi, %rsi
+	jg .Ltest
+
+	/*Compare the value with the max*/
+	cmp %rdx, %rdi
+	jge .Ltest
+
+	ret
+
+.Ltest:
+	movq $0, %rax
 	ret
 
 	.globl get_r
@@ -63,12 +143,57 @@ blend_colors:
 set_pixel:
 	ret
 
+/* 
+ * Return the square of a uint64_t
+ *
+ * Parameters:
+ * 	%rdi - the value to square
+ *
+ * Return: (in %rax)
+ *	the square of the uint64_t value
+ */
+
 	.globl square
 square:
+	/*sqare the value in %rdi*/
+	imulq %rdi, %rdi
+	/*move the value to rax for return*/
+	movq %rdi, %rax
+	/*return the value*/
 	ret
 
 	.globl square_dist
+
+/* 
+ * Return the distance of two point on the xy plane
+ *
+ * Parameters:
+ * 	%rdi - x1
+ *	%rsi - y1
+ *  %rdx - x2
+ * 	%rcx - y2
+ *
+ * Return: (in %rax)
+ *	the sum of geometric distance between (x1,y1) and (x2, y2)
+ */
+
 square_dist:
+	/*Align the stack*/
+	subq $8, %rsp
+
+	/*calculate the square of (x1-x2) and store the result in %r10*/
+	subq %rdx, %rdi
+	call square
+	movq %rax, %r10
+
+	/*calculate the square of (y1-y2)*/
+	subq %rsi, %rcx
+	movq %rcx, %rdi
+	call square
+
+	/*add the result into rax for return and restore the stack*/
+	addq %r10, %rax
+	addq $8, %rsp
 	ret
 
 /***********************************************************************
