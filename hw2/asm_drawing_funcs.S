@@ -413,7 +413,7 @@ draw_rect:
 	movq %rdi, %r14
 	movq %rsi, %r12
 	movl %edx, %r13d
-	/*These %r10 and %r11 will be used for keep track of changing of x and y coordinate*/
+	/*These %ebp and %ebx will be used for keep track of changing of x and y coordinate*/
 	movl $0, %ebx
 	movl $0, %ebp
 
@@ -436,7 +436,7 @@ draw_rect:
 	cmp %ebp, %r15d
 	/*if the current width is less than the upper bound, we jump to the inner loop*/
 	ja .Lbody
-	/*If we get into the loop, we need to increase the value of $r10 by 1*/
+	/*If we get into the loop, we need to increase the value of $ebx by 1*/
 	add $1, %ebx
 	jmp .Louter
 
@@ -449,7 +449,7 @@ draw_rect:
 	add %ebx, %edx
 	movl %r13d, %ecx
 	call draw_pixel	/*call function, with no return value*/
-	/*If we get into the loop, we need to increase the value of $r11 by 1*/
+	/*If we get into the loop, we need to increase the value of $ebp by 1*/
 	add $1, %ebp
 	/*As the loop end, We jump back to its upper loop*/
 	jmp .Linner
@@ -477,7 +477,88 @@ draw_rect:
  */
 	.globl draw_circle
 draw_circle:
-	/* TODO: implement */
+	/*save these registers for future use and also align the stack frame*/
+	pushq %rbx
+	pushq %r12
+	pushq %r13
+	pushq %r14
+	pushq %r15
+
+	/*saving all the input on the stack for future use*/
+	pushq %rbp  /*put %rbp onto stack*/
+	movq %rsp, %rbp  
+	subq $24, %rsp  /*allocate stack space*/
+	movq %rdi, -8(%rbp) /*pointer to struct Image*/
+	movl %esi, -12(%rbp) /*x coordinate of circle's center*/
+	movl %edx, -16(%rbp) /*y coordinate of circle's center*/
+	movl %ecx, -20(%rbp) /*radius of circle*/
+	movl %r8d, -24(%rbp) /*uint32_t color value*/
+
+	/*Set the variable of looping to variable*/
+	movl $0, %r12d /*a*/
+	movl $0, %r13d /*b*/
+	movl IMAGE_WIDTH_OFFSET(%rdi), %r14d /*Width*/
+	movl IMAGE_HEIGHT_OFFSET(%rdi), %r15d /*Height*/
+	/*Start Looping*/
+	jmp .Lfirst
+
+.Lfirst:
+	/*Outer Loop*/
+	cmp %r12d, %r14d
+	/*When ever we enter the first loop, we must set b to 0*/
+	movl $0, %r13d
+	/*If a is less than width we get into the loop*/
+	ja .Lsecond
+	jmp .Lstop
+
+.Lsecond:
+	/*Inner Loop*/
+	cmp %r13d, %r15d
+	/*If b is less than Height we get into the loop*/
+	ja .Lmiddle
+	add $1, %r12d
+	jmp .Lfirst
+	
+.Lmiddle:
+	/*Set the value of the distance function*/
+	movl -12(%rbp), %edi /*x*/
+	movl -16(%rbp), %esi /*y*/
+	movl %r12d, %edx/*a*/
+	movl %r13d, %ecx/*b*/
+	call square_dist /*return the distance and store it in %rax*/
+	movq %rax, %rbx
+	
+	/*Set the value of the square function*/
+	movl -20(%rbp), %edi
+	call square
+
+	/*compare the distance, if within the range call the draw_pixel function*/
+	cmp %rbx, %rax
+	jae .Lcheck
+	jmp .Ldefault
+
+.Lcheck:
+	/*Set the function for draw pixel*/
+	movq -8(%rbp), %rdi /*Image Pointer*/
+	movl %r12d, %esi /*a*/
+	movl %r13d, %edx /*b*/
+	movl -24(%rbp), %ecx /*color*/
+	call draw_pixel
+	jmp .Ldefault
+
+.Ldefault:
+	add $1, %r13d
+	jmp .Lsecond
+
+.Lstop:
+	/*Return value to callee saved register and align the stack*/
+	addq $24, %rsp
+	popq %rbp
+	popq %r15
+	popq %r14
+	popq %r13
+	popq %r12
+	popq %rbx
 	ret
 
 /*
@@ -547,7 +628,7 @@ draw_tile:
 .TFirstLoop:
 	movl -60(%rbp), %r10d  //put sprite->width into r10d
 	cmpl %r12d, %r10d  //if i == sprite->width, terminate loop and function return
-	je .TreturnSprite
+	je .TreturnTile
 	movl $0, %r13d  //set j = 0
 
 .TSecondLoop:
