@@ -342,7 +342,7 @@ void test_draw_sprite(TestObjs *objs) {
   Picture pic = {
     {
       { ' ', 0x000000ff },
-      { 'a', 0x000000ff },   //0x800080ff
+      { 'a', 0x800080ff },  
       { 'b', 0x9cadc1ff },
       { 'c', 0xefeae2ff },
       { 'd', 0x100000ff },

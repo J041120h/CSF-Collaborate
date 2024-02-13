@@ -83,9 +83,11 @@ in_bounds:
 
 	.globl compute_index
 compute_index:
-	// %rdi   pointer to a struct Image
-	// %esi   x coordinate
-	// %edx   y coordinate
+	/* 
+	   %rdi   pointer to a struct Image
+	   %esi   x coordinate
+	   %edx   y coordinate
+	*/
 
 	movl %edx, %eax   //put the value of y into %eax
 	movl IMAGE_WIDTH_OFFSET(%rdi), %r10d //put the value of image width into r10d
@@ -126,7 +128,7 @@ clamp:
 	.globl get_r
 get_r:
 
-	// %rdi    value of color to compute
+	/* %rdi    value of color to compute */
 	shrl $24, %edi    //right shift color value by 24 bits
 	movl %edi, %eax    //mov value of rdi to rax (prepare for return)
 	ret
@@ -134,7 +136,7 @@ get_r:
 	.globl get_g
 get_g:
 
-	// %rdi    value of color to compute
+	/* %rdi    value of color to compute */
 	shll $8, %edi   //left shift color value by 8
 	shrl $24, %edi  //right shift by 24
 	movl %edi, %eax //prepare for return
@@ -142,7 +144,7 @@ get_g:
 
 	.globl get_b
 get_b:
-	// %rdi    value of color to compute
+	/* %rdi    value of color to compute */
 	shll $16, %edi   //left shift color value by 16
 	shrl $24, %edi  //right shift by 24
 	movl %edi, %eax //prepare for return
@@ -167,17 +169,17 @@ get_a:
  */
 	.globl blend_components
 blend_components:
-	pushq %r12         // push %r12 onto stack
-	pushq %r13         // push %r13 onto stack
-	imulq %rdx, %rdi   // compute alpha * fg, put the value in %rdi
-	movq $255, %r12    // put 255 value in %r12
-	subq %rdx, %r12    // compute 255 - alpha, put the value in %r12
-	imulq %r12, %rsi   // compute (255-alpha) * bg, put the value in %rsi
-	movq %rdi, %rax    // put alpha * fg in rax, prepare for division
-	addq %rsi, %rax    // add alpha * gf and 255-alpha * bg, save to %rax
-	movq $0, %rdx      // set rdx to 0
+	pushq %r12         /* push %r12 onto stack */
+	pushq %r13         /* push %r13 onto stack */
+	imulq %rdx, %rdi   /* compute alpha * fg, put the value in %rdi */
+	movq $255, %r12    /* put 255 value in %r12 */
+	subq %rdx, %r12    /* compute 255 - alpha, put the value in %r12 */
+	imulq %r12, %rsi   /* compute (255-alpha) * bg, put the value in %rsi */
+	movq %rdi, %rax    /* put alpha * fg in rax, prepare for division */
+	addq %rsi, %rax    /* add alpha * gf and 255-alpha * bg, save to %rax */
+	movq $0, %rdx      /* set rdx to 0 */
 	movq $255, %r13
-	divq %r13         // divide by 255
+	divq %r13         /* divide by 255 */
 	popq %r13
 	popq %r12
 	ret
@@ -195,63 +197,63 @@ blend_components:
 
 	.globl blend_colors
 blend_colors:
-	pushq %r12   //push %r12 onto the stack
-	pushq %r13   //push %r13 onto the stack
+	pushq %r12   /*push %r12 onto the stack */
+	pushq %r13   /*push %r13 onto the stack */
 	pushq %r14
 	pushq %r15
-	pushq %rbp   //push %rbp onto the stack
-	movq %rsp, %rbp  //store the value of rsp at rbp (start of stack frame)
-	subq $16, %rsp  //reserve 16 memory space in stack frame
-	movl %edi, %r12d  //store value of fg in r12
-	movl %esi, %r13d  //store value of bg in r13
-	movl %r12d, %edi  //set argument
-	call get_a   //%rdi remain unchanged, the function only have one argument now
-	movl %eax, -4(%rbp)  //put the value of alpha at rbp-4
+	pushq %rbp   /*push %rbp onto the stack */
+	movq %rsp, %rbp  /*store the value of rsp at rbp (start of stack frame) */
+	subq $16, %rsp  /*reserve 16 memory space in stack frame */
+	movl %edi, %r12d  /*store value of fg in r12 */
+	movl %esi, %r13d  /*store value of bg in r13 */
+	movl %r12d, %edi  /*set argument */
+	call get_a   /*%rdi remain unchanged, the function only have one argument now */
+	movl %eax, -4(%rbp)  /*put the value of alpha at rbp-4 */
 
-	movl %r12d, %edi //start call blend_components first time
+	movl %r12d, %edi /*start call blend_components first time */
 	call get_r
-	movl %eax, %r14d //put value of get_r(fg) into %r14
-	movl %r13d, %edi //put the value of bg in to rdi(first argument)
+	movl %eax, %r14d /*put value of get_r(fg) into %r14 */
+	movl %r13d, %edi /*put the value of bg in to rdi(first argument) */
 	call get_r
-	movl %eax, %r15d //put value of get_r(bg) into %r15
-	movl %r14d, %edi //set first argument of blend_components
-	movl %r15d, %esi //set second argument
-	movl -4(%rbp), %edx //set third argument
+	movl %eax, %r15d /*put value of get_r(bg) into %r15 */
+	movl %r14d, %edi /*set first argument of blend_components */
+	movl %r15d, %esi /*set second argument */
+	movl -4(%rbp), %edx /*set third argument */
 	call blend_components
-	movl %eax, -8(%rbp) //store blended red color at rbp-8 
+	movl %eax, -8(%rbp) /*store blended red color at rbp-8 */ 
 
-	movl %r12d, %edi //start call blend_components
+	movl %r12d, %edi /*start call blend_components */
 	call get_g
-	movl %eax, %r14d //put value of get_r(fg) into %r14
-	movl %r13d, %edi //put the value of bg in to rdi(first argument)
+	movl %eax, %r14d /*put value of get_r(fg) into %r14 */
+	movl %r13d, %edi /*put the value of bg in to rdi(first argument) */
 	call get_g
-	movl %eax, %r15d //put value of get_r(bg) into %r15
-	movl %r14d, %edi //set first argument of blend_components
-	movl %r15d, %esi //set second argument
-	movl -4(%rbp), %edx //set third argument
+	movl %eax, %r15d /*put value of get_r(bg) into %r15 */
+	movl %r14d, %edi /*set first argument of blend_components */
+	movl %r15d, %esi /*set second argument */
+	movl -4(%rbp), %edx /*set third argument */
 	call blend_components
-	movl %eax, -12(%rbp) //store blended red color at rbp-12 
+	movl %eax, -12(%rbp) /*store blended red color at rbp-12 */
 
-	movl %r12d, %edi //start call blend_components
+	movl %r12d, %edi /*start call blend_components */
 	call get_b
-	movl %eax, %r14d //put value of get_r(fg) into %r14
-	movl %r13d, %edi //put the value of bg in to rdi(first argument)
+	movl %eax, %r14d /*put value of get_r(fg) into %r14 */
+	movl %r13d, %edi /*put the value of bg in to rdi(first argument) */
 	call get_b
-	movl %eax, %r15d //put value of get_r(bg) into %r15
-	movl %r14d, %edi //set first argument of blend_components
-	movl %r15d, %esi //set second argument
-	movl -4(%rbp), %edx //set third argument
+	movl %eax, %r15d /*put value of get_r(bg) into %r15 */
+	movl %r14d, %edi /*set first argument of blend_components */
+	movl %r15d, %esi /*set second argument */
+	movl -4(%rbp), %edx /*set third argument */
 	call blend_components
-	movl %eax, -16(%rbp) //store blended red color at rbp-16
+	movl %eax, -16(%rbp) /*store blended red color at rbp-16 */
 
 
-	movl -8(%rbp), %edi  //move stored red color to edi
-	shll $24, %edi  //left shift 24
-	movl -12(%rbp), %esi  //move stored green cikir to esi
-	shll $16, %esi //left shift 16
-	movl -16(%rbp), %edx //move stored blue color to edx
-	shll $8, %edx //left shift 8
-	movl $255, %eax //put 255
+	movl -8(%rbp), %edi  /*move stored red color to edi */
+	shll $24, %edi  /*left shift 24 */
+	movl -12(%rbp), %esi  /*move stored green cikir to esi */
+	shll $16, %esi /*left shift 16 */
+	movl -16(%rbp), %edx /*move stored blue color to edx */
+	shll $8, %edx /*left shift 8 */
+	movl $255, %eax /*put 255 */
 	addl %edi, %eax
 	addl %esi, %eax
 	addl %edx, %eax
@@ -266,22 +268,26 @@ blend_colors:
 
 	.globl set_pixel
 set_pixel:
-	//%rdi    pointer to a image
-	//%esi    index to change
-	//%edx    color to put in
-	//%r12    index value
-	//%r13    address of image->data
+	/*
+	  %rdi    pointer to a image
+	  %esi    index to change
+	  %edx    color to put in
+	  %r12    index value
+	  %r13    address of image->data
+	*/
 
 
 	pushq %r12
 	pushq %r13
-	movl %esi, %r12d   //store the index to %r12
-	movl IMAGE_DATA_OFFSET(%rdi), %r13d  //put address of image->data to r13
-	movl (%r13d, %r12d, 4), %esi  //put the current color value in image to %esi (second argument)
-	movl %edx, %edi   //set the first argument
+	subq $8, %rsp
+	movl %esi, %r12d   /*store the index to %r12 */
+	movl IMAGE_DATA_OFFSET(%rdi), %r13d  /*put address of image->data to r13 */
+	movl (%r13d, %r12d, 4), %esi  /*put the current color value in image to %esi (second argument) */
+	movl %edx, %edi   /*set the first argument */
 	call blend_colors
-	movl %eax, (%r13d, %r12d, 4)   //move the blended color to the memory position
+	movl %eax, (%r13d, %r12d, 4)   /*move the blended color to the memory position */
 
+	addq $8, %rsp
 	popq %r13
 	popq %r12
 	ret
@@ -364,23 +370,25 @@ draw_pixel:
 	pushq %r13
 	pushq %r14
 	pushq %r15
-	movq %rdi, %r12   //put the pointer to r12
-	movl %esi, %r13d  //put x coordinate
-	movl %edx, %r14d  //put y coordinate
-	movl %ecx, %r15d  //put color
+	subq $8, %rsp
+	movq %rdi, %r12   /*put the pointer to r12 */
+	movl %esi, %r13d  /*put x coordinate */
+	movl %edx, %r14d  /*put y coordinate */
+	movl %ecx, %r15d  /*put color */
 	call in_bounds
 	cmpl $0, %eax
-	je .Lreturn   //jump is ! inbounds
+	je .Lreturn   /*jump is ! inbounds */
 	movq %r12, %rdi 
 	movl %r13d, %esi
-	movl %r14d, %edx  //set up argument to compute the index
-	call compute_index
-	movl %eax, %esi  //index is the second argument
+	movl %r14d, %edx  /*set up argument to compute the index */
+	call compute_index 
+	movl %eax, %esi  /*index is the second argument */
 	movq %r12, %rdi
 	movl %r15d, %edx
 	call set_pixel 
 
 .Lreturn:
+	addq $8, %rsp
 	popq %r15
 	popq %r14
 	popq %r13
@@ -514,30 +522,32 @@ draw_tile:
 	/* TODO: implement */
 	pushq %r12
 	pushq %r13
-	pushq %rbp  //put %rbp onto stack
+	pushq %r14
+	pushq %rbp  /*put %rbp onto stack */
+	subq $8, %rsp
 	movq %rsp, %rbp  
-	subq $64, %rsp  //allocate stack space
-	movq %rdi, -8(%rbp)  //store img
-	movl %esi, -12(%rbp) //store x
-	movl %edx, -16(%rbp) //store y1
-	movq %rcx, -24(%rbp) //store spritemap
-	movq %r8, -32(%rbp)  //store sprite
-	movl IMAGE_WIDTH_OFFSET(%rdi), %eax
-	movl %eax, -36(%rbp) //store img->width
+	subq $64, %rsp  //allocate stack space */
+	movq %rdi, -8(%rbp)  /*store img */
+	movl %esi, -12(%rbp) /*store x */
+	movl %edx, -16(%rbp) /*store y1 */
+	movq %rcx, -24(%rbp) /*store spritemap */
+	movq %r8, -32(%rbp)  /*store sprite */
+	movl IMAGE_WIDTH_OFFSET(%rdi), %eax 
+	movl %eax, -36(%rbp) /*store img->width */
 	movl IMAGE_HEIGHT_OFFSET(%rdi), %eax
-	movl %eax, -40(%rbp) //store img->height 
+	movl %eax, -40(%rbp) /*store img->height */
 	movl IMAGE_WIDTH_OFFSET(%rcx), %eax
-	movl %eax,-44(%rbp) //store spritemap->width
+	movl %eax,-44(%rbp) /*store spritemap->width */
 	movl IMAGE_HEIGHT_OFFSET(%rcx), %eax
-	movl %eax,-48(%rbp) //store spritemap->height
+	movl %eax,-48(%rbp) /*store spritemap->height */
 	movl RECT_X_OFFSET(%r8), %eax
-	movl %eax,-52(%rbp) //store sprite->x
+	movl %eax,-52(%rbp) /*store sprite->x */
 	movl RECT_Y_OFFSET(%r8), %eax
-	movl %eax,-56(%rbp) //store sprite->y
+	movl %eax,-56(%rbp) /*store sprite->y */
 	movl RECT_WIDTH_OFFSET(%r8), %eax
-	movl %eax,-60(%rbp) //store sprite->width
+	movl %eax,-60(%rbp) /*store sprite->width */
 	movl RECT_HEIGHT_OFFSET(%r8), %eax
-	movl %eax,-64(%rbp) //store sprite->height
+	movl %eax,-64(%rbp) /*store sprite->height */
 
 	//value storage finished
 
@@ -545,68 +555,70 @@ draw_tile:
 	
 
 .TFirstLoop:
-	movl -60(%rbp), %r10d  //put sprite->width into r10d
-	cmpl %r12d, %r10d  //if i == sprite->width, terminate loop and function return
-	je .TreturnSprite
-	movl $0, %r13d  //set j = 0
+	movl -60(%rbp), %r10d  /*put sprite->width into r10d */
+	cmpl %r12d, %r10d  /*if i == sprite->width, terminate loop and function return */
+	je .TreturnTile
+	movl $0, %r13d  /*set j = 0 */
 
 .TSecondLoop:
-	movl -64(%rbp), %r11d  //put sprite->height into r11d
-	cmpl %r11d, %r13d  //if j == sprite->height, terminate second loop and jump to first loop
+	movl -64(%rbp), %r11d  /*put sprite->height into r11d */
+	cmpl %r11d, %r13d  /*if j == sprite->height, terminate second loop and jump to first loop */
 	je .TSecondLoopTerminate
 
-	movq -24(%rbp), %rdi  //set first argument spritemap
-	movl -52(%rbp), %esi  //set second argument
-	addl %r12d, %esi  //sprite->x + i
-	movl -56(%rbp), %edx //set third argument
-	addl %r13d, %edx   //sprite->y + j
+	movq -24(%rbp), %rdi  /*set first argument spritemap */
+	movl -52(%rbp), %esi  /*set second argument */
+	addl %r12d, %esi  /*sprite->x + i */
+	movl -56(%rbp), %edx /*set third argument */
+	addl %r13d, %edx   /*sprite->y + j */
 	call in_bounds
-	cmpl $0, %eax  //compare result with 0
+	cmpl $0, %eax  /*compare result with 0 */
 	je .TOutOfBound
 
-	movq -8(%rbp), %rdi  //set first argument img
-	movl -12(%rbp), %esi  //set second argument
-	addl %r12d, %esi  //x + i
-	movl -16(%rbp), %edx //set third argument
-	addl %r13d, %edx   //y + j
+	movq -8(%rbp), %rdi  /*set first argument img */
+	movl -12(%rbp), %esi  /*set second argument */
+	addl %r12d, %esi  /*x + i */
+	movl -16(%rbp), %edx /*set third argument */
+ 	addl %r13d, %edx   /*y + j */
 	call in_bounds
-	cmpl $0, %eax  //compare result with 0
+	cmpl $0, %eax  /*compare result with 0 */
 	je .TOutOfBound
 
-	movq -24(%rbp), %rdi //set first argument spritemap
-	movl -52(%rbp), %esi  //set second argument
-	addl %r12d, %esi  //sprite->x + i
-	movl -56(%rbp), %edx //set third argument
-	addl %r13d, %edx   //sprite->y + j
+	movq -24(%rbp), %rdi /*set first argument spritemap */
+	movl -52(%rbp), %esi  /*set second argument */
+	addl %r12d, %esi  /*sprite->x + i */
+	movl -56(%rbp), %edx /*set third argument */
+	addl %r13d, %edx   /*sprite->y + j */
 	call compute_index
-	movl %eax, %r10d //store index
-	movq -8(%rbp), %rdi  //set first argument img
-	movl -12(%rbp), %esi  //set second argument
-	addl %r12d, %esi  //x + i
-	movl -16(%rbp), %edx //set third argument
-	addl %r13d, %edx   //y + j
+	movl %eax, %r14d /*store index to r14 */
+	movq -8(%rbp), %rdi  /*set first argument img */
+	movl -12(%rbp), %esi  /*set second argument */
+	addl %r12d, %esi  /*x + i */
+	movl -16(%rbp), %edx /*set third argument */
+	addl %r13d, %edx   /*y + j */
 	call compute_index  
-	movl %eax, %r11d  //get index for image in r11
-	movq -24(%rbp), %r9  //store spritemap in r9
-	movq IMAGE_DATA_OFFSET(%r9), %rdi  //store spritemap->data address in rdi
-	movl (%rdi, %r10, 4), %ecx //get sprite->map[index]
-	movq -8(%rbp), %r9  //store img in r9
-	movq IMAGE_DATA_OFFSET(%r9), %rdi  //stor image->data address
-	movl %ecx, (%rdi, %r11, 4) //make the index equavilent
-	addl $1, %r13d  //j++
+	movl %eax, %r11d  /*get index for image in r11 */
+	movq -24(%rbp), %r9  /*store spritemap in r9 */
+	movq IMAGE_DATA_OFFSET(%r9), %rdi  /*store spritemap->data address in rdi */
+	movl (%rdi, %r14, 4), %ecx /*get sprite->map[index] */
+	movq -8(%rbp), %r9  /*store img in r9 */
+	movq IMAGE_DATA_OFFSET(%r9), %rdi  /*stor image->data address */
+	movl %ecx, (%rdi, %r11, 4) /*make the index equavilent */
+	addl $1, %r13d  /*j++ */
 	jmp .TSecondLoop
 
 .TOutOfBound:
-	addl $1, %r13d  //j++
+	addl $1, %r13d  /*j++ */
 	jmp .TSecondLoop
 
 .TSecondLoopTerminate:
-	addl $1, %r12d  //increment i by 1
+	addl $1, %r12d  /*increment i by 1 */
 	jmp .TFirstLoop
 
-.TreturnTile:		//point where the function return
+.TreturnTile:		/*point where the function return */
 	addq $64, %rsp
+	addq $8, %rsp
 	popq %rbp
+	popq %r14
 	popq %r13
 	popq %r12
 	ret
