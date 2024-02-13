@@ -28,8 +28,8 @@
  *
  * Parameters:
  * 	%rdi - a pointer to the image
- * 	%rsi - the x coordinate of the point
- *	%rdx - the y coordinate of the point
+ * 	%esi - the x coordinate of the point
+ *	%edx - the y coordinate of the point
  *
  * Return: (in %rax)
  *	A int32_t that is 0 if the point is not in the range and 1 if otherwise 
@@ -43,7 +43,7 @@ in_bounds:
 	pushq %r14
 
 	/*save input in these three registers*/
-	movl %edi, %r12d
+	movq %rdi, %r12
 	movl %esi, %r13d
 	movl %edx, %r14d
 
@@ -399,7 +399,68 @@ draw_pixel:
  */
 	.globl draw_rect
 draw_rect:
-	/* TODO: implement */
+	/*save these registers for future use and also align the stack frame*/
+	pushq %rbx
+	pushq %rbp
+	pushq %r12
+	pushq %r13
+	pushq %r14
+	pushq %r15
+
+	subq $8, %rsp
+	/*save input in these registers*/
+	movq %rdi, %r14
+	movq %rsi, %r12
+	movl %edx, %r13d
+	/*These %r10 and %r11 will be used for keep track of changing of x and y coordinate*/
+	movl $0, %ebx
+	movl $0, %ebp
+
+	/*The outer loop*/
+	jmp .Louter
+
+.Louter:
+	movl RECT_HEIGHT_OFFSET(%r12), %r15d
+	cmp %ebx, %r15d
+	/*Before entering the inner loop again, we need to retsore the value in %r11d*/
+	movl $0, %ebp
+	/*if the current height is less than the upper bound, we jump to the inner loop*/
+	ja .Linner
+	/*if the loop ends, jump to the .Lout and reset all the callee register*/
+	jmp .LEnd
+
+.Linner:
+	/*The inner loop*/
+	movl RECT_WIDTH_OFFSET(%r12), %r15d
+	cmp %ebp, %r15d
+	/*if the current width is less than the upper bound, we jump to the inner loop*/
+	ja .Lbody
+	/*If we get into the loop, we need to increase the value of $r10 by 1*/
+	add $1, %ebx
+	jmp .Louter
+
+.Lbody:
+	/*%rdi will stay the same while %rsi, %rdx, and %rcx will be updated*/
+	movq %r14, %rdi
+	movl RECT_X_OFFSET(%r12), %esi
+	movl RECT_Y_OFFSET(%r12), %edx
+	add %ebp, %esi
+	add %ebx, %edx
+	movl %r13d, %ecx
+	call draw_pixel	/*call function, with no return value*/
+	/*If we get into the loop, we need to increase the value of $r11 by 1*/
+	add $1, %ebp
+	/*As the loop end, We jump back to its upper loop*/
+	jmp .Linner
+
+.LEnd:
+	add $8, %rsp
+	popq %r15
+	popq %r14
+	popq %r13
+	popq %r12
+	popq %rbp
+	popq %rbx
 	ret
 
 /*
