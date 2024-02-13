@@ -334,15 +334,10 @@ void test_draw_sprite(TestObjs *objs) {
   struct Rect sue = { .x = 128, .y = 136, .width = 16, .height = 15 };
   draw_sprite(&objs->large, 4, 2, &objs->spritemap, &sue);
 
-  int buffer[480] = {0};
-  for(int i = 0; i < 480; i++){
-    buffer[i] = objs->large.data[i];
-  }
-
   Picture pic = {
     {
       { ' ', 0x000000ff },
-      { 'a', 0x000000ff },   //0x800080ff
+      { 'a', 0x800080ff },  
       { 'b', 0x9cadc1ff },
       { 'c', 0xefeae2ff },
       { 'd', 0x100000ff },
