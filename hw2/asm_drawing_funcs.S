@@ -281,11 +281,11 @@ set_pixel:
 	pushq %r13
 	subq $8, %rsp
 	movl %esi, %r12d   /*store the index to %r12 */
-	movl IMAGE_DATA_OFFSET(%rdi), %r13d  /*put address of image->data to r13 */
-	movl (%r13d, %r12d, 4), %esi  /*put the current color value in image to %esi (second argument) */
+	movq IMAGE_DATA_OFFSET(%rdi), %r13  /*put address of image->data to r13 */
+	movl (%r13, %r12, 4), %esi  /*put the current color value in image to %esi (second argument) */
 	movl %edx, %edi   /*set the first argument */
 	call blend_colors
-	movl %eax, (%r13d, %r12d, 4)   /*move the blended color to the memory position */
+	movl %eax, (%r13, %r12, 4)   /*move the blended color to the memory position */
 
 	addq $8, %rsp
 	popq %r13
@@ -815,15 +815,6 @@ draw_sprite:
 	movl -64(%rbp), %r11d  /*put sprite->height into r11d*/
 	cmpl %r11d, %r13d  /*if j == sprite->height, terminate second loop and jump to first loop*/
 	je .LSecondLoopTerminate
-
-	movq -24(%rbp), %rdi  /*set first argument spritemap*/
-	movl -52(%rbp), %esi  /*set second argument*/
-	addl %r12d, %esi  /*sprite->x + i*/
-	movl -56(%rbp), %edx /*set third argument*/
-	addl %r13d, %edx   /*sprite->y + j*/
-	call in_bounds
-	cmpl $0, %eax  /*compare result with 0*/
-	je .LOutOfBound
 
 	movq -8(%rbp), %rdi  /*set first argument img*/
 	movl -12(%rbp), %esi  /*set second argument*/
