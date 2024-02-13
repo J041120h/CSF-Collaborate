@@ -351,6 +351,7 @@ square_dist:
  *   %esi     - x coordinate (pixel column)
  *   %edx     - y coordinate (pixel row)
  *   %ecx     - uint32_t color value 
+ * Register usage:
  *   %r12     - pointer of image
  *   %r13     - x-coordinate
  *   %r14     - y-coordinate
@@ -493,9 +494,121 @@ draw_circle:
  *   %rcx - pointer to Image (the tilemap)
  *   %r8  - pointer to Rect (the tile)
  */
+ 	//%r12   value of index for first loop
+	//%r13   value of index for second loop
+	//-8(%rbp) pointer of dest image
+	//-12(%rbp) x coordinate
+	//-16(%rbp) y coordinate
+	//-24(%rbp) pointer to spritemap
+	//-32(%rbp) pointer to sprite
+	//-36(%rbp) img->width
+	//-40(%rbp) img->height
+	//-44(%rbp) spritemap->width
+	//-48(%rbp) spritemap->height
+	//-52(%rbp) sprite->x
+	//-56(%rbp) sprite->y
+	//-60(%rbp) sprite->width
+	//-64(%rbp) sprite->height
 	.globl draw_tile
 draw_tile:
 	/* TODO: implement */
+	pushq %r12
+	pushq %r13
+	pushq %rbp  //put %rbp onto stack
+	movq %rsp, %rbp  
+	subq $64, %rsp  //allocate stack space
+	movq %rdi, -8(%rbp)  //store img
+	movl %esi, -12(%rbp) //store x
+	movl %edx, -16(%rbp) //store y1
+	movq %rcx, -24(%rbp) //store spritemap
+	movq %r8, -32(%rbp)  //store sprite
+	movl IMAGE_WIDTH_OFFSET(%rdi), %eax
+	movl %eax, -36(%rbp) //store img->width
+	movl IMAGE_HEIGHT_OFFSET(%rdi), %eax
+	movl %eax, -40(%rbp) //store img->height 
+	movl IMAGE_WIDTH_OFFSET(%rcx), %eax
+	movl %eax,-44(%rbp) //store spritemap->width
+	movl IMAGE_HEIGHT_OFFSET(%rcx), %eax
+	movl %eax,-48(%rbp) //store spritemap->height
+	movl RECT_X_OFFSET(%r8), %eax
+	movl %eax,-52(%rbp) //store sprite->x
+	movl RECT_Y_OFFSET(%r8), %eax
+	movl %eax,-56(%rbp) //store sprite->y
+	movl RECT_WIDTH_OFFSET(%r8), %eax
+	movl %eax,-60(%rbp) //store sprite->width
+	movl RECT_HEIGHT_OFFSET(%r8), %eax
+	movl %eax,-64(%rbp) //store sprite->height
+
+	//value storage finished
+
+	movl $0, %r12d  /*store the index for first loop in %r12d*/
+	
+
+.TFirstLoop:
+	movl -60(%rbp), %r10d  //put sprite->width into r10d
+	cmpl %r12d, %r10d  //if i == sprite->width, terminate loop and function return
+	je .TreturnSprite
+	movl $0, %r13d  //set j = 0
+
+.TSecondLoop:
+	movl -64(%rbp), %r11d  //put sprite->height into r11d
+	cmpl %r11d, %r13d  //if j == sprite->height, terminate second loop and jump to first loop
+	je .TSecondLoopTerminate
+
+	movq -24(%rbp), %rdi  //set first argument spritemap
+	movl -52(%rbp), %esi  //set second argument
+	addl %r12d, %esi  //sprite->x + i
+	movl -56(%rbp), %edx //set third argument
+	addl %r13d, %edx   //sprite->y + j
+	call in_bounds
+	cmpl $0, %eax  //compare result with 0
+	je .TOutOfBound
+
+	movq -8(%rbp), %rdi  //set first argument img
+	movl -12(%rbp), %esi  //set second argument
+	addl %r12d, %esi  //x + i
+	movl -16(%rbp), %edx //set third argument
+	addl %r13d, %edx   //y + j
+	call in_bounds
+	cmpl $0, %eax  //compare result with 0
+	je .TOutOfBound
+
+	movq -24(%rbp), %rdi //set first argument spritemap
+	movl -52(%rbp), %esi  //set second argument
+	addl %r12d, %esi  //sprite->x + i
+	movl -56(%rbp), %edx //set third argument
+	addl %r13d, %edx   //sprite->y + j
+	call compute_index
+	movl %eax, %r10d //store index
+	movq -8(%rbp), %rdi  //set first argument img
+	movl -12(%rbp), %esi  //set second argument
+	addl %r12d, %esi  //x + i
+	movl -16(%rbp), %edx //set third argument
+	addl %r13d, %edx   //y + j
+	call compute_index  
+	movl %eax, %r11d  //get index for image in r11
+	movq -24(%rbp), %r9  //store spritemap in r9
+	movq IMAGE_DATA_OFFSET(%r9), %rdi  //store spritemap->data address in rdi
+	movl (%rdi, %r10, 4), %ecx //get sprite->map[index]
+	movq -8(%rbp), %r9  //store img in r9
+	movq IMAGE_DATA_OFFSET(%r9), %rdi  //stor image->data address
+	movl %ecx, (%rdi, %r11, 4) //make the index equavilent
+	addl $1, %r13d  //j++
+	jmp .TSecondLoop
+
+.TOutOfBound:
+	addl $1, %r13d  //j++
+	jmp .TSecondLoop
+
+.TSecondLoopTerminate:
+	addl $1, %r12d  //increment i by 1
+	jmp .TFirstLoop
+
+.TreturnTile:		//point where the function return
+	addq $64, %rsp
+	popq %rbp
+	popq %r13
+	popq %r12
 	ret
 
 /*
@@ -511,11 +624,122 @@ draw_tile:
  *   %esi - x coordinate of location where sprite should be copied
  *   %edx - y coordinate of location where sprite should be copied
  *   %rcx - pointer to Image (the spritemap)
- *   %r8  - pointer to Rect (the sprite)
+ *   %r8  - pointer to Rect (the sprite)	
  */
+
+	//%r12   value of index for first loop
+	//%r13   value of index for second loop
+	//-8(%rbp) pointer of dest image
+	//-12(%rbp) x coordinate
+	//-16(%rbp) y coordinate
+	//-24(%rbp) pointer to spritemap
+	//-32(%rbp) pointer to sprite
+	//-36(%rbp) img->width
+	//-40(%rbp) img->height
+	//-44(%rbp) spritemap->width
+	//-48(%rbp) spritemap->height
+	//-52(%rbp) sprite->x
+	//-56(%rbp) sprite->y
+	//-60(%rbp) sprite->width
+	//-64(%rbp) sprite->height
+
 	.globl draw_sprite
 draw_sprite:
 	/* TODO: implement */
+
+	pushq %r12
+	pushq %r13
+	pushq %rbp  //put %rbp onto stack
+	movq %rsp, %rbp  
+	subq $64, %rsp  //allocate stack space
+	movq %rdi, -8(%rbp)  //store img
+	movl %esi, -12(%rbp) //store x
+	movl %edx, -16(%rbp) //store y1
+	movq %rcx, -24(%rbp) //store spritemap
+	movq %r8, -32(%rbp)  //store sprite
+	movl IMAGE_WIDTH_OFFSET(%rdi), %eax
+	movl %eax, -36(%rbp) //store img->width
+	movl IMAGE_HEIGHT_OFFSET(%rdi), %eax
+	movl %eax, -40(%rbp) //store img->height 
+	movl IMAGE_WIDTH_OFFSET(%rcx), %eax
+	movl %eax,-44(%rbp) //store spritemap->width
+	movl IMAGE_HEIGHT_OFFSET(%rcx), %eax
+	movl %eax,-48(%rbp) //store spritemap->height
+	movl RECT_X_OFFSET(%r8), %eax
+	movl %eax,-52(%rbp) //store sprite->x
+	movl RECT_Y_OFFSET(%r8), %eax
+	movl %eax,-56(%rbp) //store sprite->y
+	movl RECT_WIDTH_OFFSET(%r8), %eax
+	movl %eax,-60(%rbp) //store sprite->width
+	movl RECT_HEIGHT_OFFSET(%r8), %eax
+	movl %eax,-64(%rbp) //store sprite->height
+
+	//value storage finished
+
+	movl $0, %r12d  /*store the index for first loop in %r12d*/
+	
+
+.LFirstLoop:
+	movl -60(%rbp), %r10d  //put sprite->width into r10d
+	cmpl %r12d, %r10d  //if i == sprite->width, terminate loop and function return
+	je .LreturnSprite
+	movl $0, %r13d  //set j = 0
+
+.LSecondLoop:
+	movl -64(%rbp), %r11d  //put sprite->height into r11d
+	cmpl %r11d, %r13d  //if j == sprite->height, terminate second loop and jump to first loop
+	je .LSecondLoopTerminate
+
+	movq -24(%rbp), %rdi  //set first argument spritemap
+	movl -52(%rbp), %esi  //set second argument
+	addl %r12d, %esi  //sprite->x + i
+	movl -56(%rbp), %edx //set third argument
+	addl %r13d, %edx   //sprite->y + j
+	call in_bounds
+	cmpl $0, %eax  //compare result with 0
+	je .LOutOfBound
+
+	movq -8(%rbp), %rdi  //set first argument img
+	movl -12(%rbp), %esi  //set second argument
+	addl %r12d, %esi  //x + i
+	movl -16(%rbp), %edx //set third argument
+	addl %r13d, %edx   //y + j
+	call in_bounds
+	cmpl $0, %eax  //compare result with 0
+	je .LOutOfBound
+
+	movq -24(%rbp), %rdi //set first argument spritemap
+	movl -52(%rbp), %esi  //set second argument
+	addl %r12d, %esi  //sprite->x + i
+	movl -56(%rbp), %edx //set third argument
+	addl %r13d, %edx   //sprite->y + j
+	call compute_index
+	movl %eax, %r10d //store index
+	movq -8(%rbp), %rdi  //set first argument img
+	movl -12(%rbp), %esi  //set second argument
+	addl %r12d, %esi  //x + i
+	movl -16(%rbp), %edx //set third argument
+	addl %r13d, %edx   //y + j
+	movq -24(%rbp), %r9  //store spritemap in r9
+	movq IMAGE_DATA_OFFSET(%r9), %r11  //store spritemap->data address in r11
+	movl (%r11, %r10, 4), %ecx //get sprite->map[index], set forth argument
+	call draw_pixel
+	addl $1, %r13d  //j++
+	jmp .LSecondLoop
+
+.LOutOfBound:
+	addl $1, %r13d  //j++
+	jmp .LSecondLoop
+
+.LSecondLoopTerminate:
+	addl $1, %r12d  //increment i by 1
+	jmp .LFirstLoop
+
+.LreturnSprite:		//point where the function return
+	addq $64, %rsp
+	popq %rbp
+	popq %r13
+	popq %r12
 	ret
 
 /*
