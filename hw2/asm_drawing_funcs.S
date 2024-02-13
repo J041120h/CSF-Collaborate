@@ -630,7 +630,27 @@ draw_tile:
 	movl RECT_HEIGHT_OFFSET(%r8), %eax
 	movl %eax,-64(%rbp) /*store sprite->height */
 
-	//value storage finished
+	/*value storage finished */
+
+	movq -24(%rbp), %rdi  /*set first argument spritemap */
+	movl -52(%rbp), %esi  /*set second argument, sprite->x */
+	movl -56(%rbp), %edx /*set third argument, sprite->y */
+	call in_bounds
+	cmpl $0, %eax  /*compare result with 0 */
+	je .TreturnTile
+
+	movq -24(%rbp), %rdi  /* set first argument spritemap */
+	movl -52(%rbp), %esi  /*set second argument, sprite->x */
+	movl -56(%rbp), %edx /*set third argument, sprite->y */
+	movl -60(%rbp), %r10d /*store sprite->width in r10d */
+	movl -64(%rbp), %r11d /*store sprite->height in r11d */
+	addl %r10d, %esi /*sprite->x + width */
+	addl %r11d, %edx /*sprite->y + height */
+	decl %esi
+	decl %edx
+	call in_bounds
+	cmpl $0, %eax
+	je .TreturnTile
 
 	movl $0, %r12d  /*store the index for first loop in %r12d*/
 	
@@ -646,14 +666,6 @@ draw_tile:
 	cmpl %r11d, %r13d  /*if j == sprite->height, terminate second loop and jump to first loop */
 	je .TSecondLoopTerminate
 
-	movq -24(%rbp), %rdi  /*set first argument spritemap */
-	movl -52(%rbp), %esi  /*set second argument */
-	addl %r12d, %esi  /*sprite->x + i */
-	movl -56(%rbp), %edx /*set third argument */
-	addl %r13d, %edx   /*sprite->y + j */
-	call in_bounds
-	cmpl $0, %eax  /*compare result with 0 */
-	je .TOutOfBound
 
 	movq -8(%rbp), %rdi  /*set first argument img */
 	movl -12(%rbp), %esi  /*set second argument */
@@ -767,7 +779,27 @@ draw_sprite:
 	movl RECT_HEIGHT_OFFSET(%r8), %eax
 	movl %eax,-64(%rbp) //store sprite->height
 
-	//value storage finished
+	/*value storage finished */
+
+	movq -24(%rbp), %rdi  /*set first argument spritemap */
+	movl -52(%rbp), %esi  /*set second argument, sprite->x */
+	movl -56(%rbp), %edx /*set third argument, sprite->y */
+	call in_bounds
+	cmpl $0, %eax  /*compare result with 0 */
+	je .LreturnSprite
+
+	movq -24(%rbp), %rdi  /* set first argument spritemap */
+	movl -52(%rbp), %esi  /*set second argument, sprite->x */
+	movl -56(%rbp), %edx /*set third argument, sprite->y */
+	movl -60(%rbp), %r10d /*store sprite->width in r10d */
+	movl -64(%rbp), %r11d /*store sprite->height in r11d */
+	addl %r10d, %esi /*sprite->x + width */
+	addl %r11d, %edx /*sprite->y + height */
+	decl %esi
+	decl %edx
+	call in_bounds
+	cmpl $0, %eax
+	je .LreturnSprite
 
 	movl $0, %r12d  /*store the index for first loop in %r12d*/
 	
@@ -782,15 +814,6 @@ draw_sprite:
 	movl -64(%rbp), %r11d  //put sprite->height into r11d
 	cmpl %r11d, %r13d  //if j == sprite->height, terminate second loop and jump to first loop
 	je .LSecondLoopTerminate
-
-	movq -24(%rbp), %rdi  //set first argument spritemap
-	movl -52(%rbp), %esi  //set second argument
-	addl %r12d, %esi  //sprite->x + i
-	movl -56(%rbp), %edx //set third argument
-	addl %r13d, %edx   //sprite->y + j
-	call in_bounds
-	cmpl $0, %eax  //compare result with 0
-	je .LOutOfBound
 
 	movq -8(%rbp), %rdi  //set first argument img
 	movl -12(%rbp), %esi  //set second argument
