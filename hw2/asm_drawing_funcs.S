@@ -542,7 +542,7 @@ draw_circle:
 
 	/*compare the distance, if within the range call the draw_pixel function*/
 	cmp %rbx, %rax
-	jae .Lcheck
+	jge .Lcheck
 	jmp .Ldefault
 
 .Lcheck:
