@@ -583,31 +583,34 @@ draw_circle:
  *   %rcx - pointer to Image (the tilemap)
  *   %r8  - pointer to Rect (the tile)
  */
- 	//%r12   value of index for first loop
-	//%r13   value of index for second loop
-	//-8(%rbp) pointer of dest image
-	//-12(%rbp) x coordinate
-	//-16(%rbp) y coordinate
-	//-24(%rbp) pointer to spritemap
-	//-32(%rbp) pointer to sprite
-	//-36(%rbp) img->width
-	//-40(%rbp) img->height
-	//-44(%rbp) spritemap->width
-	//-48(%rbp) spritemap->height
-	//-52(%rbp) sprite->x
-	//-56(%rbp) sprite->y
-	//-60(%rbp) sprite->width
-	//-64(%rbp) sprite->height
+ 	/*
+	%r12   value of index for first loop
+	%r13   value of index for second loop
+	-8(%rbp) pointer of dest image
+	-12(%rbp) x coordinate
+	-16(%rbp) y coordinate
+	-24(%rbp) pointer to spritemap
+	-32(%rbp) pointer to sprite
+	-36(%rbp) img->width
+	-40(%rbp) img->height
+	-44(%rbp) spritemap->width
+	-48(%rbp) spritemap->height
+	-52(%rbp) sprite->x
+	-56(%rbp) sprite->y
+	-60(%rbp) sprite->width
+	-64(%rbp) sprite->height
+	*/
 	.globl draw_tile
 draw_tile:
 	/* TODO: implement */
+
+	pushq %rbp  /*put %rbp onto stack */
+	movq %rsp, %rbp  
+	subq $64, %rsp  /*allocate stack space */
 	pushq %r12
 	pushq %r13
 	pushq %r14
-	pushq %rbp  /*put %rbp onto stack */
 	subq $8, %rsp
-	movq %rsp, %rbp  
-	subq $64, %rsp  //allocate stack space */
 	movq %rdi, -8(%rbp)  /*store img */
 	movl %esi, -12(%rbp) /*store x */
 	movl %edx, -16(%rbp) /*store y1 */
@@ -708,12 +711,12 @@ draw_tile:
 	jmp .TFirstLoop
 
 .TreturnTile:		/*point where the function return */
-	addq $64, %rsp
 	addq $8, %rsp
-	popq %rbp
 	popq %r14
 	popq %r13
 	popq %r12
+	addq $64, %rsp
+	popq %rbp
 	ret
 
 /*
@@ -753,11 +756,11 @@ draw_tile:
 draw_sprite:
 	/* TODO: implement */
 	
-	pushq %r12
-	pushq %r13
 	pushq %rbp  /*put %rbp onto stack*/
 	movq %rsp, %rbp  
 	subq $64, %rsp  /*allocate stack space*/
+	pushq %r12
+	pushq %r13
 	movq %rdi, -8(%rbp)  /*store img*/
 	movl %esi, -12(%rbp) /*store x*/
 	movl %edx, -16(%rbp) /*store y1*/
@@ -853,10 +856,10 @@ draw_sprite:
 	jmp .LFirstLoop
 
 .LreturnSprite:		/*point where the function return*/
-	addq $64, %rsp
-	popq %rbp
 	popq %r13
 	popq %r12
+	addq $64, %rsp
+	popq %rbp
 	ret
 
 /*
