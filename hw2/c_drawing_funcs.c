@@ -140,9 +140,12 @@ void draw_tile(struct Image *img,
                struct Image *tilemap,
                const struct Rect *tile) {
  // TODO: implement
+ if(!in_bounds(tilemap, tile->x, tile->y) || !in_bounds(tilemap, tile->x + tile->width - 1, tile->y + tile->height - 1)){
+  return;
+ }
   for(int i = 0; i < tile->width; i++){
     for(int j = 0; j < tile->height; j++){
-      if(!in_bounds(tilemap, tile->x + i, tile->y + j) || !in_bounds(img, x + i, y + j)){ //check if the tile is in range of both img and tilemap
+      if(!in_bounds(img, x + i, y + j)){ //check if the tile is in range of both img and tilemap
         continue;
       }
       uint32_t copy_index = compute_index(tilemap, tile->x + i, tile->y + j); //get corresponding index
@@ -172,9 +175,12 @@ void draw_sprite(struct Image *img,
                  struct Image *spritemap,
                  const struct Rect *sprite) {
   // TODO: implement
+  if(!in_bounds(spritemap, sprite->x, sprite->y) || !in_bounds(spritemap, (sprite->x) + (sprite->width) - 1, (sprite->y) + (sprite->height) - 1)){
+    return;
+  }
   for(int i = 0; i < sprite->width; i++){
     for(int j = 0; j < sprite->height; j++){
-      if(!in_bounds(spritemap, sprite->x + i, sprite->y + j) || !in_bounds(img, x + i, y + j)){ //check if the sprite is in the range of both img and spritemap
+      if(!in_bounds(img, x + i, y + j)){ //check if the sprite is in the range of both img and spritemap
         continue;
       }
       uint32_t copy_index = compute_index(spritemap, sprite->x + i, sprite->y + j); //compute the index in spritemap

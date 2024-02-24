@@ -143,6 +143,7 @@ void test_in_bounds(TestObjs *objs) {
   ASSERT(!in_bounds(&objs->small, 1, 9));
   ASSERT(!in_bounds(&objs->small, 1, 9));
   ASSERT(!in_bounds(&objs->small, 6, 8));
+  ASSERT(!in_bounds(&objs->small, 8, 6));
 
 }
 
@@ -152,6 +153,7 @@ void test_compute_index(TestObjs *objs) {
   ASSERT(compute_index(&objs->small, 0, 1) == 8);
   ASSERT(compute_index(&objs->small, 1, 1) == 9);
   ASSERT(compute_index(&objs->small, 3, 3) == 27);
+  ASSERT(compute_index(&objs->small, 7, 5) == 47);
 }
 
 void test_square(TestObjs *objs) {
