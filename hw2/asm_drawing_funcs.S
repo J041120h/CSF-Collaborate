@@ -281,11 +281,11 @@ set_pixel:
 	pushq %r13
 	subq $8, %rsp
 	movl %esi, %r12d   /*store the index to %r12 */
-	movl IMAGE_DATA_OFFSET(%rdi), %r13d  /*put address of image->data to r13 */
-	movl (%r13d, %r12d, 4), %esi  /*put the current color value in image to %esi (second argument) */
+	movq IMAGE_DATA_OFFSET(%rdi), %r13  /*put address of image->data to r13 */
+	movl (%r13, %r12, 4), %esi  /*put the current color value in image to %esi (second argument) */
 	movl %edx, %edi   /*set the first argument */
 	call blend_colors
-	movl %eax, (%r13d, %r12d, 4)   /*move the blended color to the memory position */
+	movl %eax, (%r13, %r12, 4)   /*move the blended color to the memory position */
 
 	addq $8, %rsp
 	popq %r13
@@ -542,7 +542,7 @@ draw_circle:
 
 	/*compare the distance, if within the range call the draw_pixel function*/
 	cmp %rbx, %rax
-	jae .Lcheck
+	jge .Lcheck
 	jmp .Ldefault
 
 .Lcheck:

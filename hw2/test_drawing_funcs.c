@@ -170,6 +170,10 @@ void test_square_dist(TestObjs *objs) {
   ASSERT(square_dist(1, 2, 1, 2) == 0);
   ASSERT(square_dist(1, 2, 0, 0) == 5);
   ASSERT(square_dist(1, 2, 10, 12) == 181);
+
+  ASSERT(square_dist(-1, -2, 1, 2) == 20);
+  ASSERT(square_dist(-1, -2, -3, -2) == 4);
+
 }
 
 void test_getr(TestObjs *objs) {
