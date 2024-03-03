@@ -1,12 +1,14 @@
+#include <atomic>
+#include <cstdint>
 #include <iostream>
-#include <string>
-#include "csim.h"
-#include "reader.h"
+#include<sstream>
+
 using std::cin;
+using std::stringstream;
+using std::string;
 using std::cout;
 using std::cerr;
 using std::endl;
-using std::string;
 int main(int argc, char* argv[]) {
     if(argc == 7) {
         cerr << "Invalid input number, some necessary part is missing!" << endl;
@@ -58,4 +60,27 @@ bool check_two_power(int n) {
         n = n / 2;
     }
     return true;
+}
+
+
+void reader() {
+    string line;
+    string currentCommand;
+    uint32_t memoryAddress;
+    while (std::getline(cin, line)) {
+        if (line.empty()) {
+            break; // Stop if the line is empty
+        } else {
+            stringstream input;
+            input << line;
+            if (input >> currentCommand >> memoryAddress) {
+                // Successfully extracted command and memory address
+                std::cout << "Command: " << currentCommand << ", Memory Address: " << memoryAddress << std::endl;
+            } else {
+                // Handle error: Could not extract both values
+                std::cout << "Error: Invalid input format." << std::endl;
+            }
+        }
+
+    }
 }

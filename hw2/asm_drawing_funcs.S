@@ -327,23 +327,33 @@ square:
  */
 
 square_dist:
-	/*Align the stack*/
-	subq $8, %rsp
+    /* save values of callee-saved registers */
+    pushq %r12
+    pushq %r13
+    subq $8, %rsp
 
-	/*calculate the square of (x1-x2) and store the result in %r10*/
-	subq %rdx, %rdi
-	call square
-	movq %rax, %r10
+    movq %rsi, %r12  /* save value of y1 */
+    movq %rcx, %r13  /* save value of y2 */
 
-	/*calculate the square of (y1-y2)*/
-	subq %rsi, %rcx
-	movq %rcx, %rdi
-	call square
+    /* compute x2-x1 */
+    subq %rdi, %rdx
+    movq %rdx, %rdi
+    call square      /* compute (x2-x1)^2 */
 
-	/*add the result into rax for return and restore the stack*/
-	addq %r10, %rax
-	addq $8, %rsp
-	ret
+    /* compute y2-y1 */
+    subq %r12, %r13
+    movq %rax, %r12
+    movq %r13, %rdi
+    call square      /* compute (y2-y1)^2 */
+
+    /* compute (x2-x1)^2 + (y2-y1)^2 */
+    addq %r12, %rax  /* put sum of squares in %rax */
+
+    /* restore values of callee-saved registers */
+    addq $8, %rsp
+    popq %r13
+    popq %r12
+    ret
 
 /***********************************************************************
    Public API functions
@@ -529,15 +539,15 @@ draw_circle:
 	
 .Lmiddle:
 	/*Set the value of the distance function*/
-	movl -12(%rbp), %edi /*x*/
-	movl -16(%rbp), %esi /*y*/
+	movslq -12(%rbp), %rdi /*x*/
+	movslq -16(%rbp), %rsi /*y*/
 	movl %r12d, %edx/*a*/
 	movl %r13d, %ecx/*b*/
 	call square_dist /*return the distance and store it in %rax*/
 	movq %rax, %rbx
 	
 	/*Set the value of the square function*/
-	movl -20(%rbp), %edi
+	movslq -20(%rbp), %rdi
 	call square
 
 	/*compare the distance, if within the range call the draw_pixel function*/
