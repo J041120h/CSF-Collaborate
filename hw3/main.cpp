@@ -10,6 +10,10 @@ using std::cout;
 using std::cerr;
 using std::endl;
 int main(int argc, char* argv[]) {
+    string line;
+    string currentCommand;
+    uint32_t memoryAddress;
+
     if(argc != 7) {
         cerr << "Invalid input number, some necessary part is missing!" << endl;
         exit(-1);
@@ -49,16 +53,6 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
-
-}
-
-
-
-
-void read_input() {
-    string line;
-    string currentCommand;
-    uint32_t memoryAddress;
     while (std::getline(cin, line)) {
         if (line.empty()) {
             break; // Stop if the line is empty
@@ -71,8 +65,14 @@ void read_input() {
             } else {
                 // Handle error: Could not extract both values
                 std::cout << "Error: Invalid input format." << std::endl;
+                break;
             }
         }
 
     }
+
+
 }
+
+
+
