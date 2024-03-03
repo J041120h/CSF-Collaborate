@@ -1,8 +1,8 @@
 #include <atomic>
 #include <cstdint>
 #include <iostream>
-#include<sstream>
-
+#include <sstream>
+#include "csim.h"
 using std::cin;
 using std::stringstream;
 using std::string;
@@ -10,7 +10,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 int main(int argc, char* argv[]) {
-    if(argc == 7) {
+    if(argc != 7) {
         cerr << "Invalid input number, some necessary part is missing!" << endl;
         exit(-1);
     }
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
     string store_memory_write = argv[5];
-    if(store_memory_write != "write through" && store_memory_write != "write back") {
+    if(store_memory_write != "write-through" && store_memory_write != "write-back") {
         cerr << "Undefined command" << endl;
         exit(-1);
     }
@@ -52,18 +52,10 @@ int main(int argc, char* argv[]) {
 
 }
 
-bool check_two_power(int n) {
-    while(n != 0) {
-        if(n % 2 != 0) {
-            return false;
-        }
-        n = n / 2;
-    }
-    return true;
-}
 
 
-void reader() {
+
+void read_input() {
     string line;
     string currentCommand;
     uint32_t memoryAddress;
