@@ -35,6 +35,8 @@ struct Cache {
 //check if the n is the power of 2
 bool check_two_power(int n);
 
+uint32_t get_two_power(uint32_t n);
+
 //if the command is load, the function load will be called
 void load(Cache &cache, uint32_t address, std::string replaceApproach);
 //if the command is store, the function store will be called
