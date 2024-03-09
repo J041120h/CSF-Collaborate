@@ -46,7 +46,8 @@ void store(Cache &cache, uint32_t address, std::string loadMain, std::string sto
 //return 1. tag 2. index (discard the offset)
 std::pair<uint32_t, uint32_t> parse(Cache &cache, uint32_t address);
 
-//check if the store or load is hit or miss
+//check if the store orvccc load is hit or miss
+//true if hit and false is not
 bool checkHit(Cache &cache, uint32_t index, uint32_t tag);
 
 //check if there's additional slot

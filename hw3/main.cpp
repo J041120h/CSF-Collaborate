@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
         } else {
             stringstream input;
             input << line;
-            if (input >> currentCommand >> memoryAddress) {
+            if (input >> currentCommand >> std::hex >> memoryAddress) {
                 // Successfully extracted command and memory address
                 std::cout << "Command: " << currentCommand << ", Memory Address: " << memoryAddress << std::endl;
             } else {

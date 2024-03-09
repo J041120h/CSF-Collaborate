@@ -2,11 +2,8 @@ CXX = g++
 CXXFLAGS = -g -Wall -std=c++17 -Wextra -pedantic
 
 
-csim: reader.o csim.o main.o
-	$(CXX) $(CXXFLAGS) -o csim reader.o csim.o main.o
-
-reader.o: reader.cpp reader.h
-	$(CXX) $(CXXFLAGS) -c reader.cpp
+csim: csim.o main.o
+	$(CXX) $(CXXFLAGS) -o csim  csim.o main.o
 
 csim.o: csim.cpp csim.h
 	$(CXX) $(CXXFLAGS) -c csim.cpp
