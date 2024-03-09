@@ -18,10 +18,12 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
     //parse
     std::pair<uint32_t, uint32_t> parResult;
     parResult = parse(cache, address);
-    Set currentSet = cache.sets[parResult.first];
+    Set currentSet = cache.sets[parResult.second];
     bool hitStatus = checkHit(cache, parResult.second, parResult.first);
     if (hitStatus) {
         //if hit, update time
+        cache.totalCycle += 1;
+        cache.loadHit++;
     } else {
         uint32_t setStatus = checkSlotAvailability(currentSet);
         if (setStatus != uint32_t(-1)) {
@@ -35,7 +37,10 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
                 lru(cache, currentSet, parResult.first);
             }
         }
+        cache.totalCycle += cache.sizeSlot*25;
+        cache.loadMiss ++;
     }
+    cache.loadCount++;
 }
 
 uint32_t get_two_power(uint32_t n) {
@@ -69,7 +74,7 @@ bool checkHit(Cache &cache, uint32_t index, uint32_t tag) {
 }
 
 uint32_t checkSlotAvailability(Set &set) {
-    for (int i = 0; i < set.maxSlots; i++) {
+    for (uint32_t i = 0; i < set.maxSlots; i++) {
         if(!(set.slots[i].valid)) {
             return i;
         }
@@ -80,7 +85,7 @@ uint32_t checkSlotAvailability(Set &set) {
 void fifo(Cache &cache,  Set &set, uint32_t tag) {
     uint32_t index = 0;
     uint32_t oldest = set.slots[0].load_ts;
-    for(int i =0 ; i < set.maxSlots; i ++) {
+    for(uint32_t i =0 ; i < set.maxSlots; i ++) {
         if (set.slots[i].load_ts < oldest) {
             index = i;
             oldest = set.slots[i].load_ts;
@@ -94,7 +99,7 @@ void fifo(Cache &cache,  Set &set, uint32_t tag) {
 void lru(Cache &cache, Set &set, uint32_t tag) {
     uint32_t index = 0;
     uint32_t oldest = set.slots[0].load_ts;
-    for(int i =0 ; i < set.maxSlots; i ++) {
+    for(uint32_t i =0 ; i < set.maxSlots; i ++) {
         if (set.slots[i].access_ts < oldest) {
             index = i;
             oldest = set.slots[i].access_ts;
