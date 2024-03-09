@@ -78,8 +78,20 @@ uint32_t checkSlotAvailability(Set &set) {
     return -1;
 }
 
-void fifo(Cache &cachet, uint32_t tag) {
+void fifo(Cache &cache,  Set &set, uint32_t tag) {
+    uint32_t index = 0;
+    uint32_t oldest = set.slots[0].load_ts;
+    for(int i =0 ; i < set.maxSlots; i ++) {
+        if (set.slots[i].load_ts < oldest) {
+            index = i;
+            oldest = set.slots[i].load_ts;
+        }
+    }
+    set.slots[index].tag = tag;
+    set.slots[index].access_ts = cache.totalCycle;
+    set.slots[index].load_ts = cache.totalCycle;
 }
+
 void lru(Cache &cache, uint32_t tag) {
     
 }
