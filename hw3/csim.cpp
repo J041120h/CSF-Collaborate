@@ -79,5 +79,7 @@ uint32_t checkSlotAvailability(Set &set) {
 }
 
 void fifo(Cache &cachet, uint32_t tag) {
+}
+void lru(Cache &cache, uint32_t tag) {
     
 }
