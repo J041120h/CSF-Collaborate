@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <iostream>
 #include <sstream>
+#include <vector>
 #include "csim.h"
 using std::cin;
 using std::stringstream;
@@ -9,6 +10,7 @@ using std::string;
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::vector;
 int main(int argc, char* argv[]) {
     string line;
     string currentCommand;
@@ -18,17 +20,17 @@ int main(int argc, char* argv[]) {
         cerr << "Invalid input number, some necessary part is missing!" << endl;
         exit(-1);
     }
-    int num_set = std::stoi(argv[1]);
+    uint32_t num_set = std::stoi(argv[1]);
     if(!check_two_power(num_set)) {
         cerr << "Set number should be power of 2" << endl;
         exit(-1);
     }
-    int num_block = std::stoi(argv[2]);
+    uint32_t num_block = std::stoi(argv[2]);
     if(!check_two_power(num_block)) {
         cerr << "Block nummber should be power of 2" << endl;
         exit(-1);
     }
-    int num_bytes = std::stoi(argv[3]);
+    uint32_t num_bytes = std::stoi(argv[3]);
     if(!check_two_power(num_bytes)) {
         cerr << "Byte nummber should be power of 2" << endl;
         exit(-1);
@@ -52,6 +54,18 @@ int main(int argc, char* argv[]) {
         cerr << "Undefined command" << endl;
         exit(-1);
     }
+    vector<Set> CacheSets;
+    for (uint32_t i = 0; i < num_set; i++) {
+        vector<Slot> setSlots;
+        for(uint32_t j = 0; j < num_block; j++) {
+            Slot slot = {0, 0, 0, 0};
+            setSlots.push_back(slot);
+        }
+        Set set = {setSlots, num_block};
+        CacheSets.push_back(set);
+    }
+    Cache cache = {CacheSets, 0, 0, 0, 0, 0, 0, 0, num_set, num_block, num_bytes};
+
 
     while (std::getline(cin, line)) {
         if (line.empty()) {
@@ -59,7 +73,8 @@ int main(int argc, char* argv[]) {
         } else {
             stringstream input;
             input << line;
-            if (input >> currentCommand >> memoryAddress) {
+            uint32_t temp = 0;
+            if (input >> currentCommand >> memoryAddress >> temp) {
                 // Successfully extracted command and memory address
                 std::cout << "Command: " << currentCommand << ", Memory Address: " << memoryAddress << std::endl;
             } else {
