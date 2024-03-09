@@ -84,3 +84,6 @@ uint32_t checkSlotAvailability(Set &set) {
     }
     return -1;
 }
+void lru(Cache &cache, uint32_t tag) {
+    
+}
