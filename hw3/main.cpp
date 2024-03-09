@@ -54,6 +54,7 @@ int main(int argc, char* argv[]) {
         cerr << "Undefined command" << endl;
         exit(-1);
     }
+
     vector<Set> CacheSets;
     for (uint32_t i = 0; i < num_set; i++) {
         vector<Slot> setSlots;
@@ -76,6 +77,7 @@ int main(int argc, char* argv[]) {
             if (input >> currentCommand >> std::hex >> memoryAddress) {
                 // Successfully extracted command and memory address
                 std::cout << "Command: " << currentCommand << ", Memory Address: " << memoryAddress << std::endl;
+                load(cache, memoryAddress, lru_or_fifo);
             } else {
                 // Handle error: Could not extract both values
                 std::cout << "Error: Invalid input format." << std::endl;
@@ -84,6 +86,15 @@ int main(int argc, char* argv[]) {
         }
 
     }
+
+    //print the out put
+    std::cout << "Total loads: " << cache.loadCount << std::endl;
+    std::cout << "Total stores: " << cache.storeCount << std::endl;
+    std::cout << "Load hits: " << cache.loadHit << std::endl;
+    std::cout << "Load misses: " << cache.loadMiss << std::endl;
+    std::cout << "Store hits: " << cache.storeHit << std::endl;
+    std::cout << "Store misses: " << cache.storeMiss << std::endl;
+    std::cout << "Total cycles: " << cache.totalCycle << std::endl;
 
 
 }

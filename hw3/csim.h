@@ -61,5 +61,4 @@ void fifo(Cache &cache, Set &set, uint32_t tag);
 
 //if it's least recently used
 void lru(Cache &cache, Set &set, uint32_t tag);
-
 #endif
