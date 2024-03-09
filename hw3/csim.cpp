@@ -31,9 +31,9 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
             currentSet.slots[setStatus] = input;
         } else {
             if (replaceApproach == "fifo") {
-                fifo(cache, parResult.first);
+                fifo(cache, currentSet, parResult.first);
             } else {
-                lru(cache, parResult.first);
+                lru(cache, currentSet, parResult.first);
             }
         }
     }
