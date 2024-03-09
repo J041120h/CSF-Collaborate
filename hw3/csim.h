@@ -57,9 +57,9 @@ bool checkHit(Cache &cache, uint32_t index, uint32_t tag);
 uint32_t checkSlotAvailability(Set &set);
 
 //if it's first in and first out
-void fifo(Set &set, uint32_t tag);
+void fifo(Cache &cachet, uint32_t tag);
 
 //if it's least recently used
-void lru(Set &set, uint32_t tag);
+void lru(Cache &cache, uint32_t tag);
 
 #endif
