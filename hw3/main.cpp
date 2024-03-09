@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
             if (input >> currentCommand >> std::hex >> memoryAddress) {
                 // Successfully extracted command and memory address
                 std::cout << "Command: " << currentCommand << ", Memory Address: " << memoryAddress << std::endl;
+                load(cache, memoryAddress, lru_or_fifo);
             } else {
                 // Handle error: Could not extract both values
                 std::cout << "Error: Invalid input format." << std::endl;

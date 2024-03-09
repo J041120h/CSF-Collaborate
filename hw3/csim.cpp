@@ -16,7 +16,6 @@ bool check_two_power(int n) {
 
 void load(Cache &cache, uint32_t address, std::string replaceApproach) {
     //parse
-    return;
     std::pair<uint32_t, uint32_t> parResult;
     parResult = parse(cache, address);
     Set currentSet = cache.sets[parResult.first];
