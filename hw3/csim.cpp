@@ -18,7 +18,7 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
     //parse
     std::pair<uint32_t, uint32_t> parResult;
     parResult = parse(cache, address);
-    Set currentSet = cache.sets[parResult.second];
+    Set& currentSet = cache.sets[parResult.second];
     bool hitStatus = checkHit(cache, parResult.second, parResult.first);
     if (hitStatus) {
         //if hit, update time
