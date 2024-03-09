@@ -92,6 +92,17 @@ void fifo(Cache &cache,  Set &set, uint32_t tag) {
     set.slots[index].load_ts = cache.totalCycle;
 }
 
-void lru(Cache &cache, uint32_t tag) {
+void lru(Cache &cache, Set &set, uint32_t tag) {
+    uint32_t index = 0;
+    uint32_t oldest = set.slots[0].load_ts;
+    for(int i =0 ; i < set.maxSlots; i ++) {
+        if (set.slots[i].access_ts < oldest) {
+            index = i;
+            oldest = set.slots[i].access_ts;
+        }
+    }
+    set.slots[index].tag = tag;
+    set.slots[index].access_ts = cache.totalCycle;
+    set.slots[index].load_ts = cache.totalCycle;
     
 }
