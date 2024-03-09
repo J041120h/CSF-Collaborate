@@ -39,9 +39,9 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
             currentSet.slots[setStatus] = input;
         } else {
             if (replaceApproach == "fifo") {
-                fifo(cache, parResult.first);
+                fifo(cache, currentSet, parResult.first);
             } else {
-                lru(cache, parResult.first);
+                lru(cache, currentSet, parResult.first);
             }
         }
     }
@@ -84,6 +84,16 @@ uint32_t checkSlotAvailability(Set &set) {
     }
     return -1;
 }
-void lru(Cache &cache, uint32_t tag) {
-    
+void lru(Cache &cache, Set &set, uint32_t tag) {
+    std::vector<Slot> slots = set.slots;
+    uint32_t min_cycle = slots[0].access_ts;
+    uint32_t min_index = 0;
+    for(int i = 0; i < set.maxSlots; i++) {
+        if(slots[i].access_ts < min_cycle) {
+            min_cycle = slots[i].access_ts;
+            min_index = i;
+        }
+    }
+    //discard slots[min_index], update cycle
+    slots[min_index] = {tag, true, cache.totalCycle, cache.totalCycle};
 }
