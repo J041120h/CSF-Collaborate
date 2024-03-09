@@ -23,14 +23,6 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
     bool hitStatus = checkHit(cache, parResult.second, parResult.first);
     if (hitStatus) {
         //if hit, update time
-        for (std::vector<Slot>::iterator i = currentSet.slots.begin(); i != currentSet.slots.end(); i++ ) {
-            if (i->valid) {
-                if (i->tag == parResult.first) {
-                    //the slot is already available in the set
-                    i->access_ts = cache.totalCycle;
-                } 
-            }
-        }
     } else {
         uint32_t setStatus = checkSlotAvailability(currentSet);
         if (setStatus != uint32_t(-1)) {
@@ -69,6 +61,7 @@ bool checkHit(Cache &cache, uint32_t index, uint32_t tag) {
     for(std::vector<Slot>::iterator it = slots.begin(); it != slots.end(); it++) {
         if(it->valid) {
             if(it->tag == tag) {
+                it->access_ts = cache.totalCycle;
                 return true;
             }
         }
@@ -84,16 +77,9 @@ uint32_t checkSlotAvailability(Set &set) {
     }
     return -1;
 }
-void lru(Cache &cache, Set &set, uint32_t tag) {
-    std::vector<Slot> slots = set.slots;
-    uint32_t min_cycle = slots[0].access_ts;
-    uint32_t min_index = 0;
-    for(int i = 0; i < set.maxSlots; i++) {
-        if(slots[i].access_ts < min_cycle) {
-            min_cycle = slots[i].access_ts;
-            min_index = i;
-        }
-    }
-    //discard slots[min_index], update cycle
-    slots[min_index] = {tag, true, cache.totalCycle, cache.totalCycle};
+
+void fifo(Cache &cachet, uint32_t tag) {
+}
+void lru(Cache &cache, uint32_t tag) {
+    
 }
