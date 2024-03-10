@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
     for (uint32_t i = 0; i < num_set; i++) {
         vector<Slot> setSlots;
         for(uint32_t j = 0; j < num_block; j++) {
-            Slot slot = {0, 0, 0, 0};
+            Slot slot = {0, 0, 0, 0, false};
             setSlots.push_back(slot);
         }
         Set set = {setSlots, num_block};

@@ -28,7 +28,7 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
         uint32_t setStatus = checkSlotAvailability(currentSet);
         if (setStatus != uint32_t(-1)) {
             //If there's still space availble in current set
-            Slot input = Slot{parResult.first, true, cache.totalCycle,cache.totalCycle};
+            Slot input = Slot{parResult.first, true, cache.totalCycle,cache.totalCycle, false};
             currentSet.slots[setStatus] = input;
         } else {
             if (replaceApproach == "fifo") {

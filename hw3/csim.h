@@ -11,6 +11,7 @@ struct Slot {
     bool valid;
     uint32_t load_ts,
              access_ts;
+    bool dirty;
 };
 
 struct Set {
@@ -61,4 +62,14 @@ void fifo(Cache &cache, Set &set, uint32_t tag);
 
 //if it's least recently used
 void lru(Cache &cache, Set &set, uint32_t tag);
+
+void writeThrough(Cache &cache, Set &set);
+
+void writeBack(Cache &cache, Set &set);
+
+void noWriteAllocate(Cache &cache);
+
+void writeAllocate(Cache &cache);
+
+void discard(Cache &cache, Slot &slot);
 #endif
