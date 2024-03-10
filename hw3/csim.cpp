@@ -112,7 +112,7 @@ uint32_t checkSlotAvailability(Set &set) {
     return -1;
 }
 
-void fifo(Cache &cache,  Set &set, uint32_t tag) {
+uint32_t fifo(Cache &cache,  Set &set, uint32_t tag) {
     uint32_t index = 0;
     uint32_t oldest = set.slots[0].load_ts;
     for(uint32_t i =0 ; i < set.maxSlots; i ++) {
@@ -127,9 +127,10 @@ void fifo(Cache &cache,  Set &set, uint32_t tag) {
     set.slots[index].tag = tag;
     set.slots[index].access_ts = cache.totalCycle;
     set.slots[index].load_ts = cache.totalCycle;
+    return index;
 }
 
-void lru(Cache &cache, Set &set, uint32_t tag) {
+uint32_t lru(Cache &cache, Set &set, uint32_t tag) {
     uint32_t index = 0;
     uint32_t oldest = set.slots[0].load_ts;
     for(uint32_t i =0 ; i < set.maxSlots; i ++) {
@@ -143,6 +144,7 @@ void lru(Cache &cache, Set &set, uint32_t tag) {
     set.slots[index].tag = tag;
     set.slots[index].access_ts = cache.totalCycle;
     set.slots[index].load_ts = cache.totalCycle;
+    return index;
 }
 
 void noWriteAllocate(Cache &cache) {
@@ -150,18 +152,21 @@ void noWriteAllocate(Cache &cache) {
 }
 
 void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t tag) {
+    uint32_t index = -1;
     uint32_t setStatus = checkSlotAvailability(set);
     if (setStatus != uint32_t(-1)) {
         //If there's still space availble in current set
-        Slot input = Slot{tag, true, cache.totalCycle,cache.totalCycle, false};
+        Slot input = Slot{tag, true, cache.totalCycle,cache.totalCycle, true};
         set.slots[setStatus] = input;
     } else {
         if (replaceApproach == "fifo") {
-            fifo(cache, set, tag);
+            index = fifo(cache, set, tag);
         } else {
-            lru(cache, set, tag);
+            index =lru(cache, set, tag);
         }
+        set.slots[index].dirty = true;
     }
+    cache.totalCycle += cache.sizeSlot/4*100 + 1;
 }
 
 void writeThrough(Cache &cache, Set &set, uint32_t index) {

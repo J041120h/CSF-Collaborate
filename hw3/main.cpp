@@ -76,7 +76,6 @@ int main(int argc, char* argv[]) {
             input << line;
             if (input >> currentCommand >> std::hex >> memoryAddress) {
                 // Successfully extracted command and memory address
-                std::cout << "Command: " << currentCommand << ", Memory Address: " << memoryAddress << std::endl;
                 if (currentCommand == "l" ) {
                     load(cache, memoryAddress, lru_or_fifo);
                 } else {
@@ -89,7 +88,15 @@ int main(int argc, char* argv[]) {
                 break;
             }
         }
+    }
 
+    //Discard all the elements is write back
+    if (store_memory_write == "write-back") {
+        for (uint32_t i = 0; i < num_set; i++) {
+            for(uint32_t j = 0; j < num_block; j++) {
+                discard(cache, cache.sets[i].slots[j]);
+            }
+        }
     }
 
     //print the out put
