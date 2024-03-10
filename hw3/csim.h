@@ -63,13 +63,13 @@ void fifo(Cache &cache, Set &set, uint32_t tag);
 //if it's least recently used
 void lru(Cache &cache, Set &set, uint32_t tag);
 
-void writeThrough(Cache &cache, Set &set);
+void writeThrough(Cache &cache, Set &set, uint32_t index);
 
 void writeBack(Cache &cache, Set &set);
 
 void noWriteAllocate(Cache &cache);
 
-void writeAllocate(Cache &cache);
+void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t tag);
 
 void discard(Cache &cache, Slot &slot);
 #endif

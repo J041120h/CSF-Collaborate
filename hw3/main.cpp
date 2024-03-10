@@ -95,8 +95,6 @@ int main(int argc, char* argv[]) {
     std::cout << "Store hits: " << cache.storeHit << std::endl;
     std::cout << "Store misses: " << cache.storeMiss << std::endl;
     std::cout << "Total cycles: " << cache.totalCycle << std::endl;
-
-
 }
 
 
