@@ -43,6 +43,36 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
     cache.loadCount++;
 }
 
+void store(Cache &cache, uint32_t address, std::string loadMain, std::string storemain, std::string replaceApproach) {
+    std::pair<uint32_t, uint32_t> parResult;
+    parResult = parse(cache, address);
+    Set& currentSet = cache.sets[parResult.second];
+    bool hitStatus = checkHit(cache, parResult.second, parResult.first);
+    if (hitStatus) {
+        uint32_t index = 0;
+        for (uint32_t i = 0; i < currentSet.maxSlots; i++) {
+            if (currentSet.slots[i].tag == parResult.first) {
+                index = i;
+            }
+        }
+        if (loadMain == "write through") {
+            writeThrough(cache, cache.sets[parResult.second], index);
+        } else {
+            writeBack(cache, cache.sets[parResult.second], index);
+        }
+        cache.storeHit++;
+        cache.totalCycle += 1;
+    } else {
+        if (storemain == "no-write-allocate") {
+            noWriteAllocate(cache);
+        } else {
+            writeAllocate(cache, cache.sets[parResult.second], replaceApproach, parResult.first);
+        }
+        cache.storeMiss++;
+    }
+    cache.storeCount++;
+}
+
 uint32_t get_two_power(uint32_t n) {
     uint32_t count = 0;
     while(n != 1) {
@@ -109,4 +139,16 @@ void lru(Cache &cache, Set &set, uint32_t tag) {
     set.slots[index].access_ts = cache.totalCycle;
     set.slots[index].load_ts = cache.totalCycle;
     
+}
+
+void writeBack(Cache &cache, Set &set, uint32_t index) {
+    set.slots[index].dirty = true;
+    set.slots[index].access_ts = cache.totalCycle;
+}
+
+void discard(Cache &cache, Slot &slot) {
+    if (slot.dirty) {
+        cache.totalCycle += cache.sizeSlot * 25;
+        slot.dirty = false;
+    }
 }

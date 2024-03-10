@@ -41,7 +41,7 @@ uint32_t get_two_power(uint32_t n);
 //if the command is load, the function load will be called
 void load(Cache &cache, uint32_t address, std::string replaceApproach);
 //if the command is store, the function store will be called
-void store(Cache &cache, uint32_t address, std::string loadMain, std::string storemain);
+void store(Cache &cache, uint32_t address, std::string loadMain, std::string storemain, std::string replaceApproach);
 
 //helper functions for load and store
 
@@ -65,7 +65,7 @@ void lru(Cache &cache, Set &set, uint32_t tag);
 
 void writeThrough(Cache &cache, Set &set);
 
-void writeBack(Cache &cache, Set &set);
+void writeBack(Cache &cache, Set &set, uint32_t index);
 
 void noWriteAllocate(Cache &cache);
 
