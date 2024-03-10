@@ -121,6 +121,9 @@ void fifo(Cache &cache,  Set &set, uint32_t tag) {
             oldest = set.slots[i].load_ts;
         }
     }
+    //discard the original node
+    discard(cache, set.slots[index]);
+    //update
     set.slots[index].tag = tag;
     set.slots[index].access_ts = cache.totalCycle;
     set.slots[index].load_ts = cache.totalCycle;
@@ -135,10 +138,47 @@ void lru(Cache &cache, Set &set, uint32_t tag) {
             oldest = set.slots[i].access_ts;
         }
     }
+    //discard the original node
+    discard(cache, set.slots[index]);
     set.slots[index].tag = tag;
     set.slots[index].access_ts = cache.totalCycle;
     set.slots[index].load_ts = cache.totalCycle;
-    
+}
+
+void noWriteAllocate(Cache &cache) {
+    cache.totalCycle += cache.sizeSlot/4*100;
+}
+
+void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t tag) {
+    uint32_t setStatus = checkSlotAvailability(set);
+    if (setStatus != uint32_t(-1)) {
+        //If there's still space availble in current set
+        Slot input = Slot{tag, true, cache.totalCycle,cache.totalCycle, false};
+        set.slots[setStatus] = input;
+    } else {
+        if (replaceApproach == "fifo") {
+            fifo(cache, set, tag);
+        } else {
+            lru(cache, set, tag);
+        }
+    }
+}
+
+void writeThrough(Cache &cache, Set &set, uint32_t tag, uint32_t index) {
+    set.slots[index].access_ts = cache.totalCycle;
+    cache.totalCycle += cache.sizeSlot/4*100;
+}
+
+void writeBack(Cache &cache, Set &set, uint32_t index) {
+    set.slots[index].dirty = true;
+    set.slots[index].access_ts = cache.totalCycle;
+}
+
+void discard(Cache &cache, Slot &slot) {
+    if (slot.dirty) {
+        cache.totalCycle += cache.sizeSlot * 25;
+        slot.dirty = false;
+    }
 }
 
 void writeBack(Cache &cache, Set &set, uint32_t index) {
