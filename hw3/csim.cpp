@@ -180,15 +180,3 @@ void discard(Cache &cache, Slot &slot) {
         slot.dirty = false;
     }
 }
-
-void writeBack(Cache &cache, Set &set, uint32_t index) {
-    set.slots[index].dirty = true;
-    set.slots[index].access_ts = cache.totalCycle;
-}
-
-void discard(Cache &cache, Slot &slot) {
-    if (slot.dirty) {
-        cache.totalCycle += cache.sizeSlot * 25;
-        slot.dirty = false;
-    }
-}
