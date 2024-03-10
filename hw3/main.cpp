@@ -91,13 +91,13 @@ int main(int argc, char* argv[]) {
     }
 
     //Discard all the elements is write back
-    if (store_memory_write == "write-back") {
-        for (uint32_t i = 0; i < num_set; i++) {
-            for(uint32_t j = 0; j < num_block; j++) {
-                discard(cache, cache.sets[i].slots[j]);
-            }
-        }
-    }
+    //if (store_memory_write == "write-back") {
+        //for (uint32_t i = 0; i < num_set; i++) {
+            //for(uint32_t j = 0; j < num_block; j++) {
+                //discard(cache, cache.sets[i].slots[j]);
+            //}
+        //}
+    //}
 
     //print the out put
     std::cout << "Total loads: " << cache.loadCount << std::endl;
