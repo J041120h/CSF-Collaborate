@@ -66,7 +66,7 @@ void store(Cache &cache, uint32_t address, std::string loadMain, std::string sto
         if (storemain == "no-write-allocate") {
             noWriteAllocate(cache);
         } else {
-            writeAllocate(cache, cache.sets[parResult.second], replaceApproach, parResult.first);
+            writeAllocate(cache, replaceApproach, cache.sets[parResult.second], parResult.first);
         }
         cache.storeMiss++;
     }
@@ -164,7 +164,7 @@ void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t
     }
 }
 
-void writeThrough(Cache &cache, Set &set, uint32_t tag, uint32_t index) {
+void writeThrough(Cache &cache, Set &set, uint32_t index) {
     set.slots[index].access_ts = cache.totalCycle;
     cache.totalCycle += cache.sizeSlot/4*100;
 }
