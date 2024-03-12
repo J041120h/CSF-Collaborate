@@ -51,11 +51,11 @@ std::pair<uint32_t, uint32_t> parse(Cache &cache, uint32_t address);
 
 //check if the store orvccc load is hit or miss
 //true if hit and false is not
-bool checkHit(Cache &cache, uint32_t index, uint32_t tag);
+int checkHit(Cache &cache, uint32_t index, uint32_t tag);
 
 //check if there's additional slot
 //return -1 if the slot is full, otherwise the index of the corresponding slot
-uint32_t checkSlotAvailability(Set &set);
+int checkSlotAvailability(Set &set);
 
 //if it's first in and first out
 uint32_t fifo(Cache &cache, Set &set, uint32_t tag);
@@ -69,7 +69,7 @@ void writeBack(Cache &cache, Set &set, uint32_t index);
 
 void noWriteAllocate(Cache &cache);
 
-void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t tag);
+void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t tag, uint32_t address, std::string writeApproach);
 
 void discard(Cache &cache, Slot &slot);
 #endif

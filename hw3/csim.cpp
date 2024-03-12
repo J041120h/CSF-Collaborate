@@ -19,9 +19,10 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
     std::pair<uint32_t, uint32_t> parResult;
     parResult = parse(cache, address);
     Set& currentSet = cache.sets[parResult.second];
-    bool hitStatus = checkHit(cache, parResult.second, parResult.first);
-    if (hitStatus) {
+    int hitStatus = checkHit(cache, parResult.second, parResult.first);
+    if (hitStatus != -1) {
         //if hit, update time
+        cache.sets[parResult.second].slots[hitStatus].access_ts = cache.totalCycle; 
         cache.totalCycle += 1;
         cache.loadHit++;
     } else {
@@ -37,7 +38,7 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
                 lru(cache, currentSet, parResult.first);
             }
         }
-        cache.totalCycle += cache.sizeSlot*25 + 1;
+        cache.totalCycle += cache.sizeSlot*25;
         cache.loadMiss ++;
     }
     cache.loadCount++;
@@ -47,25 +48,21 @@ void store(Cache &cache, uint32_t address, std::string loadMain, std::string sto
     std::pair<uint32_t, uint32_t> parResult;
     parResult = parse(cache, address);
     Set& currentSet = cache.sets[parResult.second];
-    bool hitStatus = checkHit(cache, parResult.second, parResult.first);
-    if (hitStatus) {
-        uint32_t index = 0;
-        for (uint32_t i = 0; i < currentSet.maxSlots; i++) {
-            if (currentSet.slots[i].tag == parResult.first) {
-                index = i;
-            }
-        }
+    int hitStatus = checkHit(cache, parResult.second, parResult.first);
+    if (hitStatus != -1) {
         if (loadMain == "write-through") {
-            writeThrough(cache, cache.sets[parResult.second], index);
+            cache.totalCycle++;
+            writeThrough(cache, cache.sets[parResult.second], hitStatus);
         } else {
-            writeBack(cache, cache.sets[parResult.second], index);
+            cache.totalCycle++;
+            writeBack(cache, cache.sets[parResult.second], hitStatus);
         }
         cache.storeHit++;
     } else {
         if (storemain == "no-write-allocate") {
             noWriteAllocate(cache);
         } else {
-            writeAllocate(cache, replaceApproach, cache.sets[parResult.second], parResult.first);
+            writeAllocate(cache, replaceApproach, cache.sets[parResult.second], parResult.first, address, loadMain);
         }
         cache.storeMiss++;
     }
@@ -89,20 +86,19 @@ std::pair<uint32_t, uint32_t> parse(Cache &cache, uint32_t address) {
     return std::make_pair(tag, index);
 }
 
-bool checkHit(Cache &cache, uint32_t index, uint32_t tag) {
+int checkHit(Cache &cache, uint32_t index, uint32_t tag) {
     std::vector<Slot> slots = cache.sets[index].slots;
-    for(std::vector<Slot>::iterator it = slots.begin(); it != slots.end(); it++) {
-        if(it->valid) {
-            if(it->tag == tag) {
-                it->access_ts = cache.totalCycle;
-                return true;
+    for(uint32_t i = 0; i < cache.numSlot; i++) {
+        if(slots[i].valid) {
+            if(slots[i].tag == tag) {
+                return i;
             }
         }
     }
-    return false;
+    return -1;
 }
 
-uint32_t checkSlotAvailability(Set &set) {
+int checkSlotAvailability(Set &set) {
     for (uint32_t i = 0; i < set.maxSlots; i++) {
         if(!(set.slots[i].valid)) {
             return i;
@@ -131,7 +127,7 @@ uint32_t fifo(Cache &cache,  Set &set, uint32_t tag) {
 
 uint32_t lru(Cache &cache, Set &set, uint32_t tag) {
     uint32_t index = 0;
-    uint32_t oldest = set.slots[0].load_ts;
+    uint32_t oldest = set.slots[0].access_ts;
     for(uint32_t i =0 ; i < set.maxSlots; i ++) {
         if (set.slots[i].access_ts < oldest) {
             index = i;
@@ -139,10 +135,14 @@ uint32_t lru(Cache &cache, Set &set, uint32_t tag) {
         }
     }
     //discard the original node
-    discard(cache, set.slots[index]);
-    set.slots[index].tag = tag;
-    set.slots[index].access_ts = cache.totalCycle;
-    set.slots[index].load_ts = cache.totalCycle;
+    bool dirty = false;
+    if (set.slots[index].dirty) {
+        dirty = true;
+    }
+    set.slots[index] = {tag, true, cache.totalCycle, cache.totalCycle, false};
+    if (dirty) {
+        cache.totalCycle += cache.sizeSlot * 25;
+    }
     return index;
 }
 
@@ -150,27 +150,44 @@ void noWriteAllocate(Cache &cache) {
     cache.totalCycle += 25;
 }
 
-void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t tag) {
-    uint32_t index = -1;
-    uint32_t setStatus = checkSlotAvailability(set);
-    if (setStatus != uint32_t(-1)) {
-        //If there's still space availble in current set
-        Slot input = Slot{tag, true, cache.totalCycle,cache.totalCycle, true};
-        set.slots[setStatus] = input;
-    } else {
-        if (replaceApproach == "fifo") {
-            index = fifo(cache, set, tag);
-        } else {
-            index =lru(cache, set, tag);
+void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t tag, uint32_t address, std::string writeApproach) {
+    
+    load(cache, address, replaceApproach);
+    cache.loadCount--;
+    cache.loadMiss--;
+    if (writeApproach == "write-back") {
+        int index = -1;
+        for (int i = 0; i < cache.numSlot; i++) {
+            if (set.slots[i].tag == tag) {
+                index = i;
+                break;
+            }
         }
         set.slots[index].dirty = true;
+        cache.totalCycle++;
+    } else {
+        cache.totalCycle += cache.sizeSlot * 25;
     }
-    cache.totalCycle += cache.sizeSlot/4*100 + 1;
+    //uint32_t index = -1;
+    //uint32_t setStatus = checkSlotAvailability(set);
+    //if (setStatus != uint32_t(-1)) {
+        //If there's still space availble in current set
+        //Slot input = Slot{tag, true, cache.totalCycle,cache.totalCycle, true};
+        //set.slots[setStatus] = input;
+    //} else {
+        //if (replaceApproach == "fifo") {
+            //index = fifo(cache, set, tag);
+        //} else {
+            //index =lru(cache, set, tag);
+        //}
+        //set.slots[index].dirty = true;
+    //}
+    //cache.totalCycle += cache.sizeSlot/4*100 + 1;
 }
 
 void writeThrough(Cache &cache, Set &set, uint32_t index) {
     set.slots[index].access_ts = cache.totalCycle;
-    cache.totalCycle += 26;
+    cache.totalCycle += cache.sizeSlot * 25;
 }
 
 void writeBack(Cache &cache, Set &set, uint32_t index) {
