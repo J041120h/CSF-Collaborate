@@ -134,7 +134,6 @@ uint32_t lru(Cache &cache, Set &set, uint32_t tag) {
             oldest = set.slots[i].access_ts;
         }
     }
-    //discard the original node
     bool dirty = false;
     if (set.slots[index].dirty) {
         dirty = true;
@@ -147,7 +146,7 @@ uint32_t lru(Cache &cache, Set &set, uint32_t tag) {
 }
 
 void noWriteAllocate(Cache &cache) {
-    cache.totalCycle += 25;
+    cache.totalCycle += 100;
 }
 
 void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t tag, uint32_t address, std::string writeApproach) {
@@ -166,7 +165,7 @@ void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t
         set.slots[index].dirty = true;
         cache.totalCycle++;
     } else {
-        cache.totalCycle += cache.sizeSlot * 25;
+        cache.totalCycle += 100;
     }
     //uint32_t index = -1;
     //uint32_t setStatus = checkSlotAvailability(set);
@@ -187,7 +186,7 @@ void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t
 
 void writeThrough(Cache &cache, Set &set, uint32_t index) {
     set.slots[index].access_ts = cache.totalCycle;
-    cache.totalCycle += cache.sizeSlot * 25;
+    cache.totalCycle += 100;
 }
 
 void writeBack(Cache &cache, Set &set, uint32_t index) {
