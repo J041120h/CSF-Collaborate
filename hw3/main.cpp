@@ -90,15 +90,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    //Discard all the elements is write back
-    //if (store_memory_write == "write-back") {
-        //for (uint32_t i = 0; i < num_set; i++) {
-            //for(uint32_t j = 0; j < num_block; j++) {
-                //discard(cache, cache.sets[i].slots[j]);
-            //}
-        //}
-    //}
-
     //print the out put
     std::cout << "Total loads: " << cache.loadCount << std::endl;
     std::cout << "Total stores: " << cache.storeCount << std::endl;
@@ -107,6 +98,12 @@ int main(int argc, char* argv[]) {
     std::cout << "Store hits: " << cache.storeHit << std::endl;
     std::cout << "Store misses: " << cache.storeMiss << std::endl;
     std::cout << "Total cycles: " << cache.totalCycle << std::endl;
+
+    double loadHitRate = (double)cache.loadHit/cache.loadCount;
+    double storeHitRate = (double)cache.storeHit/cache.storeCount;
+    std::cout << std::endl;
+    std::cout<< "Hit Rate: " << loadHitRate << std::endl;
+    std::cout<< "Store Rate: " << storeHitRate << std::endl;
 }
 
 
