@@ -134,14 +134,20 @@ uint32_t lru(Cache &cache, Set &set, uint32_t tag) {
             oldest = set.slots[i].access_ts;
         }
     }
-    bool dirty = false;
-    if (set.slots[index].dirty) {
-        dirty = true;
-    }
-    set.slots[index] = {tag, true, cache.totalCycle, cache.totalCycle, false};
-    if (dirty) {
-        cache.totalCycle += cache.sizeSlot * 25;
-    }
+    //bool dirty = false;
+    //if (set.slots[index].dirty) {
+    //    dirty = true;
+    //}
+    //set.slots[index] = {tag, true, cache.totalCycle, cache.totalCycle, false};
+    //if (dirty) {
+        //cache.totalCycle += cache.sizeSlot * 25;
+    //}
+    //return index;
+    discard(cache, set.slots[index]);
+    //update
+    set.slots[index].tag = tag;
+    set.slots[index].access_ts = cache.totalCycle;
+    set.slots[index].load_ts = cache.totalCycle;
     return index;
 }
 
@@ -154,18 +160,27 @@ void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t
     load(cache, address, replaceApproach);
     cache.loadCount--;
     cache.loadMiss--;
-    if (writeApproach == "write-back") {
-        int index = -1;
-        for (int i = 0; i < cache.numSlot; i++) {
-            if (set.slots[i].tag == tag) {
-                index = i;
-                break;
-            }
+    int index = -1;
+    for (int i = 0; i < cache.numSlot; i++) {
+        if (set.slots[i].tag == tag) {
+            index = i;
+            break;
         }
-        set.slots[index].dirty = true;
-        cache.totalCycle++;
+    }
+    if (writeApproach == "write-back") {
+        //int index = -1;
+        //for (int i = 0; i < cache.numSlot; i++) {
+            //if (set.slots[i].tag == tag) {
+            //    index = i;
+            //    break;
+            //}
+        //}
+        //set.slots[index].dirty = true;
+        //cache.totalCycle++;
+        writeBack(cache, set, index);
     } else {
-        cache.totalCycle += 100;
+        //cache.totalCycle += 100;
+        writeThrough(cache, set, index);
     }
     //uint32_t index = -1;
     //uint32_t setStatus = checkSlotAvailability(set);
