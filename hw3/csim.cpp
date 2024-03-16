@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 
+//helper function to chaeck if the the input number is a power of 2
 bool check_two_power(int n) {
     while(n != 1) {
         if(n % 2 != 0) {
@@ -14,6 +15,7 @@ bool check_two_power(int n) {
     return true;
 }
 
+//the main load function
 void load(Cache &cache, uint32_t address, std::string replaceApproach) {
     //parse
     std::pair<uint32_t, uint32_t> parResult;
@@ -26,11 +28,11 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
         cache.totalCycle += 1;
         cache.loadHit++;
     } else {
-        uint32_t setStatus = checkSlotAvailability(currentSet);
-        if (setStatus != uint32_t(-1)) {
+        uint32_t setPosition = checkSlotAvailability(currentSet);
+        if (setPosition != uint32_t(-1)) {
             //If there's still space availble in current set
             Slot input = Slot{parResult.first, true, cache.totalCycle,cache.totalCycle, false};
-            currentSet.slots[setStatus] = input;
+            currentSet.slots[setPosition] = input;
         } else {
             if (replaceApproach == "fifo") {
                 fifo(cache, currentSet, parResult.first);
@@ -38,6 +40,7 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
                 lru(cache, currentSet, parResult.first);
             }
         }
+        //update the total cycle as we write to the main memory
         cache.totalCycle += cache.sizeSlot*25;
         cache.loadMiss ++;
     }
@@ -45,18 +48,17 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
 }
 
 void store(Cache &cache, uint32_t address, std::string loadMain, std::string storemain, std::string replaceApproach) {
+    //parse the function
     std::pair<uint32_t, uint32_t> parResult;
     parResult = parse(cache, address);
-    Set& currentSet = cache.sets[parResult.second];
     int hitStatus = checkHit(cache, parResult.second, parResult.first);
     if (hitStatus != -1) {
         if (loadMain == "write-through") {
-            cache.totalCycle++;
             writeThrough(cache, cache.sets[parResult.second], hitStatus);
         } else {
-            cache.totalCycle++;
             writeBack(cache, cache.sets[parResult.second], hitStatus);
         }
+        cache.totalCycle++;
         cache.storeHit++;
     } else {
         if (storemain == "no-write-allocate") {
@@ -110,6 +112,7 @@ int checkSlotAvailability(Set &set) {
 uint32_t fifo(Cache &cache,  Set &set, uint32_t tag) {
     uint32_t index = 0;
     uint32_t oldest = set.slots[0].load_ts;
+    //check which block is imported oldest (with smallest load_ts)
     for(uint32_t i =0 ; i < set.maxSlots; i ++) {
         if (set.slots[i].load_ts < oldest) {
             index = i;
@@ -119,29 +122,24 @@ uint32_t fifo(Cache &cache,  Set &set, uint32_t tag) {
     //discard the original node
     discard(cache, set.slots[index]);
     //update
-    set.slots[index].tag = tag;
-    set.slots[index].access_ts = cache.totalCycle;
-    set.slots[index].load_ts = cache.totalCycle;
+    set.slots[index] = {tag, true, cache.totalCycle, cache.totalCycle, false};
     return index;
 }
 
 uint32_t lru(Cache &cache, Set &set, uint32_t tag) {
     uint32_t index = 0;
     uint32_t oldest = set.slots[0].access_ts;
+    //find the least recently used slot
     for(uint32_t i =0 ; i < set.maxSlots; i ++) {
         if (set.slots[i].access_ts < oldest) {
             index = i;
             oldest = set.slots[i].access_ts;
         }
     }
-    bool dirty = false;
-    if (set.slots[index].dirty) {
-        dirty = true;
-    }
+    //discard the original node
+    discard(cache, set.slots[index]);
+    //update
     set.slots[index] = {tag, true, cache.totalCycle, cache.totalCycle, false};
-    if (dirty) {
-        cache.totalCycle += cache.sizeSlot * 25;
-    }
     return index;
 }
 
@@ -150,38 +148,25 @@ void noWriteAllocate(Cache &cache) {
 }
 
 void writeAllocate(Cache &cache, std::string replaceApproach, Set &set, uint32_t tag, uint32_t address, std::string writeApproach) {
-    
+    //load the memory into cache
     load(cache, address, replaceApproach);
+    int index = -1;
     cache.loadCount--;
     cache.loadMiss--;
-    if (writeApproach == "write-back") {
-        int index = -1;
-        for (int i = 0; i < cache.numSlot; i++) {
-            if (set.slots[i].tag == tag) {
-                index = i;
-                break;
-            }
+
+    //find the index of the slot
+    for (uint32_t i = 0; i < cache.numSlot; i++) {
+        if (set.slots[i].tag == tag) {
+            index = i;
+            break;
         }
-        set.slots[index].dirty = true;
-        cache.totalCycle++;
-    } else {
-        cache.totalCycle += 100;
     }
-    //uint32_t index = -1;
-    //uint32_t setStatus = checkSlotAvailability(set);
-    //if (setStatus != uint32_t(-1)) {
-        //If there's still space availble in current set
-        //Slot input = Slot{tag, true, cache.totalCycle,cache.totalCycle, true};
-        //set.slots[setStatus] = input;
-    //} else {
-        //if (replaceApproach == "fifo") {
-            //index = fifo(cache, set, tag);
-        //} else {
-            //index =lru(cache, set, tag);
-        //}
-        //set.slots[index].dirty = true;
-    //}
-    //cache.totalCycle += cache.sizeSlot/4*100 + 1;
+    
+    if (writeApproach == "write-back") {
+        writeBack(cache, set, index);
+    } else {
+        writeThrough(cache, set, index);
+    }
 }
 
 void writeThrough(Cache &cache, Set &set, uint32_t index) {
