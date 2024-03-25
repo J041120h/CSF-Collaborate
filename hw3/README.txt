@@ -331,14 +331,15 @@ Hit Rate: 0.966112
 Store Rate: 0.848131
 
 
-This is the experiment we conducted for our cache simulator. Basically, we try a written approach combining with LRU and FIFO respectively, and test these combinations
-on a fully associative, two-set associative cache with different set numbers, and direct mapping cache structure. The size of the cache we used is 1 MB. Overall, we found that the direct mapping way of organizing the cache
+The above are the results of the experiment that we conducted for our cache simulator. Basically, we tried a written approach combining with LRU and FIFO respectively, and test these combinations
+on a fully associative, two set-associative cache with different set numbers, and direct mapping cache structure. The size of the cache we used is 1 MB. Overall, we found that the direct mapping way of organizing the cache
 has the lowest hit rate for both loading and storing, implicating more loading and writing to memory and more cycles. The overall cycle count and hit rate for loading and
-storing are similar for fully associative cache and set associative cache, with fully associative cache having a slightly higher hit and lower cycle. However, the running time
+storing are similar for fully associative cache and set associative cache, with fully associative cache having a slightly higher hit and lower cycle counts. However, the running time
 for set associative (both) is faster than fully associative, as checking the validity of the block (sequential access in the case, as we did not use a map) is significantly faster
 in a set with less block. For two ways of replacing block, LRU has an overall lower cycle and higher hit rate than FIFO. For three ways of storage handling, the combination of 
 write allocate and write back is superior, having a higher rate than no-write-allocate & write through, and significantly less cycle than write allocate & write through (about
 50 %). Overall, we think the combination of write-allocate & write-back back & LRU with a set associative cache is better. For specific set numbers in the set associative cache, we think
-there is great flexibility here (also an advantage of set associative). If we have more sets, we will have faster searching time while more miss and cycle. If we have fewer
-sets, we will have less miss and cycle, while experiencing longer search time. The choice should be made based on the application scenario and cache size.
+there is great flexibility here (also an advantage of set associative) based on specific cases and demand. If we have more sets, we will have faster searching time while more miss and cycle. 
+This is has a overall better performance if the hardware is slow in searching within the set. If we have fewer sets, we will have less miss and cycle, while experiencing longer search time. This should be used if toatl cycle count matters more.
+The overall choice should be made based on the application scenario and cache size.
 
