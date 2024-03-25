@@ -17,7 +17,7 @@ bool check_two_power(int n) {
 
 //the main load function
 void load(Cache &cache, uint32_t address, std::string replaceApproach) {
-    //parse
+    //parse the address
     std::pair<uint32_t, uint32_t> parResult;
     parResult = parse(cache, address);
     Set& currentSet = cache.sets[parResult.second];
@@ -34,6 +34,7 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
             Slot input = Slot{parResult.first, true, cache.totalCycle,cache.totalCycle, false};
             currentSet.slots[setPosition] = input;
         } else {
+            //if the set is already full, discard the unnessary block based on the instruction
             if (replaceApproach == "fifo") {
                 fifo(cache, currentSet, parResult.first);
             } else {
@@ -48,11 +49,12 @@ void load(Cache &cache, uint32_t address, std::string replaceApproach) {
 }
 
 void store(Cache &cache, uint32_t address, std::string loadMain, std::string storemain, std::string replaceApproach) {
-    //parse the function
+    //parse the address
     std::pair<uint32_t, uint32_t> parResult;
     parResult = parse(cache, address);
     int hitStatus = checkHit(cache, parResult.second, parResult.first);
     if (hitStatus != -1) {
+        //store the block based on the instruction
         if (loadMain == "write-through") {
             writeThrough(cache, cache.sets[parResult.second], hitStatus);
         } else {
@@ -61,6 +63,7 @@ void store(Cache &cache, uint32_t address, std::string loadMain, std::string sto
         cache.totalCycle++;
         cache.storeHit++;
     } else {
+        //if miss, discard the block and update the set
         if (storemain == "no-write-allocate") {
             noWriteAllocate(cache);
         } else {
@@ -71,6 +74,7 @@ void store(Cache &cache, uint32_t address, std::string loadMain, std::string sto
     cache.storeCount++;
 }
 
+//check if the input is a power of 2
 uint32_t get_two_power(uint32_t n) {
     uint32_t count = 0;
     while(n != 1) {
@@ -80,6 +84,7 @@ uint32_t get_two_power(uint32_t n) {
     return count;
 }
 
+//interperet the address
 std::pair<uint32_t, uint32_t> parse(Cache &cache, uint32_t address) {
     uint32_t num_bit_offset = get_two_power(cache.sizeSlot);
     uint32_t num_bit_index = get_two_power(cache.numSet);
@@ -88,6 +93,7 @@ std::pair<uint32_t, uint32_t> parse(Cache &cache, uint32_t address) {
     return std::make_pair(tag, index);
 }
 
+//check if the expected block exist in the cache already
 int checkHit(Cache &cache, uint32_t index, uint32_t tag) {
     std::vector<Slot> slots = cache.sets[index].slots;
     for(uint32_t i = 0; i < cache.numSlot; i++) {
@@ -100,6 +106,7 @@ int checkHit(Cache &cache, uint32_t index, uint32_t tag) {
     return -1;
 }
 
+//check if there's empty space in the set
 int checkSlotAvailability(Set &set) {
     for (uint32_t i = 0; i < set.maxSlots; i++) {
         if(!(set.slots[i].valid)) {
@@ -109,6 +116,7 @@ int checkSlotAvailability(Set &set) {
     return -1;
 }
 
+//replace the block based on fifo principle
 uint32_t fifo(Cache &cache,  Set &set, uint32_t tag) {
     uint32_t index = 0;
     uint32_t oldest = set.slots[0].load_ts;
@@ -126,6 +134,7 @@ uint32_t fifo(Cache &cache,  Set &set, uint32_t tag) {
     return index;
 }
 
+//replace the block based on lru principle
 uint32_t lru(Cache &cache, Set &set, uint32_t tag) {
     uint32_t index = 0;
     uint32_t oldest = set.slots[0].access_ts;
@@ -143,6 +152,7 @@ uint32_t lru(Cache &cache, Set &set, uint32_t tag) {
     return index;
 }
 
+//update the total cycle, store or load the block based on instruction
 void noWriteAllocate(Cache &cache) {
     cache.totalCycle += 100;
 }
@@ -180,6 +190,7 @@ void writeBack(Cache &cache, Set &set, uint32_t index) {
     cache.totalCycle++;
 }
 
+//discard extra block
 void discard(Cache &cache, Slot &slot) {
     if (slot.dirty) {
         cache.totalCycle += cache.sizeSlot * 25;

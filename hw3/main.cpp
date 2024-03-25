@@ -16,8 +16,9 @@ int main(int argc, char* argv[]) {
     string currentCommand;
     uint32_t memoryAddress;
 
+    //The following check if the input is valid, and store necessary data
     if(argc != 7) {
-        cerr << "Invalid input number, some necessary part is missing!" << endl;
+        cerr << "Invalid input number, some necessary part is missing or too many arguments!" << endl;
         exit(-1);
     }
     uint32_t num_set = std::stoi(argv[1]);
@@ -55,6 +56,7 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
+    //initial the set
     vector<Set> CacheSets;
     for (uint32_t i = 0; i < num_set; i++) {
         vector<Slot> setSlots;
@@ -68,6 +70,7 @@ int main(int argc, char* argv[]) {
     Cache cache = {CacheSets, 0, 0, 0, 0, 0, 0, 0, num_set, num_block, num_bytes};
 
 
+    //call the functions based on instruction
     while (std::getline(cin, line)) {
         if (line.empty()) {
             break; // Stop if the line is empty
