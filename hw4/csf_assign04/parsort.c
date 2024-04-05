@@ -81,7 +81,19 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     merge_sort(arr, begin, mid, threshold);
     exit(0);
   }
-  
+
+  pid_t pid2 = fork();
+  if (pid2 == -1) {
+    // fork failed to start a new process
+    // handle the error and exit
+    fprintf(stderr, "Child process failed\n");
+    exit(EXIT_FAILURE); //exist the child process with faliure
+  } else if (pid2 == 0) {
+    // this is now in the child process
+    merge_sort(arr, mid, end, threshold);
+    exit(0);
+  }
+
   // blocks until the process indentified by pid_to_wait_for completes
   int wstatus1;
   pid_t actual_pid1 = waitpid(pid1, &wstatus1, 0);
@@ -98,19 +110,6 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
       // if following standard UNIX conventions, this is also an error
       fprintf(stderr, "Child process exist with error code\n");
     }
-  }
-
-
-  pid_t pid2 = fork();
-  if (pid2 == -1) {
-    // fork failed to start a new process
-    // handle the error and exit
-    fprintf(stderr, "Child process failed\n");
-    exit(EXIT_FAILURE); //exist the child process with faliure
-  } else if (pid2 == 0) {
-    // this is now in the child process
-    merge_sort(arr, mid, end, threshold);
-    exit(0);
   }
 
   int wstatus2;
