@@ -70,7 +70,6 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
 
   size_t mid = begin + size/2;
 
-  // TODO: parallelize the recursive sorting
   pid_t pid1 = fork();
   if (pid1 == -1) {
     // fork failed to start a new process
