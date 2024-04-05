@@ -107,17 +107,39 @@ int main(int argc, char **argv) {
   size_t threshold = (size_t) strtoul(argv[2], &end, 10);
   if (end != argv[2] + strlen(argv[2])) {
     // TODO: report an error (threshold value is invalid)
+    fprintf(stderr, "Error: threshold value is invalid");
   }
 
   // TODO: open the file
-
+  int fd = open(filename, O_RDWR);
+  if (fd < 0) {
+    fprintf(stderr, "Error: cannot open file %s\n", filename);
+    exit(-1);
+  }
   // TODO: use fstat to determine the size of the file
-
+  struct stat statbuf;
+  int rc = fstat(fd, &statbuf);
+  if (rc != 0) {
+    fprintf(stderr, "Error: cannot get vaild size of file\n");
+    exit(-1);
+  }
+  size_t file_size_in_bytes = statbuf.st_size;
   // TODO: map the file into memory using mmap
-
+  int64_t *data = mmap(NULL, file_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+  if (data == MAP_FAILED) {
+    fprintf(stderr, "Error, failure during mapping to the file\n");
+    exit(-1);
+  }
   // TODO: sort the data!
+  merge_sort(data, 0, (size_t)(rc / 8), threshold);
 
   // TODO: unmap and close the file
-
+  if(munmap(data, file_size_in_bytes) == -1) {
+    fprintf(stderr, "Error: failing to unmap the file\n");
+    exit(-1);
+  }
+  close(fd);
+  fprintf(stdout, "Finished\n");
   // TODO: exit with a 0 exit code if sort was successful
+  exit(0);
 }
