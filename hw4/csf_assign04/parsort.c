@@ -75,11 +75,12 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   if (pid1 == -1) {
     // fork failed to start a new process
     // handle the error and exit
-    fprintf(stderr, "fork failed\n");
+    fprintf(stderr, "Child process failed\n");
     exit(EXIT_FAILURE); //exist the child process with faliure
   } else if (pid1 == 0) {
     // this is now in the child process
     merge_sort(arr, begin, mid, threshold);
+    exit(0);
   }
   
   // blocks until the process indentified by pid_to_wait_for completes
@@ -87,17 +88,16 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   pid_t actual_pid1 = waitpid(pid1, &wstatus1, 0);
   if (actual_pid1 == -1) {
     // handle waitpid failure
-    
+      fprintf(stderr, "waitpid failure\n");
   } else {
     if (!WIFEXITED(wstatus1)) {
       // subprocess crashed, was interrupted, or did not exit normally
-      // handle as error
-      fprintf(stderr, "waitpid failure\n");
+      fprintf(stderr, "Child process exist unsuccessfully\n");
     }
     if (WEXITSTATUS(wstatus1) != 0) {
       // subprocess returned a non-zero exit code
       // if following standard UNIX conventions, this is also an error
-      fprintf(stderr, "fork exist with error code\n");
+      fprintf(stderr, "Child process exist with error code\n");
     }
   }
 
@@ -106,11 +106,11 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   if (pid2 == -1) {
     // fork failed to start a new process
     // handle the error and exit
-    fprintf(stderr, "fork failed\n");
+    fprintf(stderr, "Child process failed\n");
     exit(EXIT_FAILURE); //exist the child process with faliure
   } else if (pid2 == 0) {
     // this is now in the child process
-    merge_sort(arr, begin, mid, threshold);
+    merge_sort(arr, mid, end, threshold);
     exit(0);
   }
 
@@ -123,18 +123,14 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     if (!WIFEXITED(wstatus2)) {
       // subprocess crashed, was interrupted, or did not exit normally
       // handle as error
-      fprintf(stderr, "fork exist unsuccessfully\n");
+      fprintf(stderr, "Child process exist unsuccessfully\n");
     }
     if (WEXITSTATUS(wstatus2) != 0) {
       // subprocess returned a non-zero exit code
       // if following standard UNIX conventions, this is also an error
-      fprintf(stderr, "fork exist with error code\n");
+      fprintf(stderr, "Child process exist with error code\n");
     }
   }
-
-
-
-
 
   // allocate temp array now, so we can avoid unnecessary work
   // if the malloc fails
@@ -152,7 +148,6 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
 
   // now we can free the temp array
   free(temp_arr);
-
   // success!
 }
 
@@ -193,7 +188,7 @@ int main(int argc, char **argv) {
     exit(-1);
   }
   // TODO: sort the data!
-  merge_sort(data, 0, (size_t)(rc / 8), threshold);
+  merge_sort(data, 0, (size_t)(file_size_in_bytes/ 8), threshold);
 
   // TODO: unmap and close the file
   if(munmap(data, file_size_in_bytes) == -1) {
