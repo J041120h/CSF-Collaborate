@@ -104,12 +104,13 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     if (!WIFEXITED(wstatus1)) {
       // subprocess crashed, was interrupted, or did not exit normally
       fprintf(stderr, "Error: child process exist unsuccessfully\n");
+      exit(EXIT_FAILURE);
     }
     if (WEXITSTATUS(wstatus1) != 0) {
       // subprocess returned a non-zero exit code
       // if following standard UNIX conventions, this is also an error
-      exit(EXIT_FAILURE); //exist the parent process with faliure
       fprintf(stderr, "Error: child process exist with error code\n");
+      exit(EXIT_FAILURE); //exist the parent process with faliure
     }
   }
 
@@ -159,9 +160,9 @@ int main(int argc, char **argv) {
   }
   int count = 0;
   while (argv[2][count] != '\0') {
-    if (argv[2][count] == '.' || argv[2][count] < '0' || argv[2][count] > '9') {
+    if (argv[2][count] < '0' || argv[2][count] > '9') {
       fprintf(stderr, "Error: threshold should be an int\n");
-      exit(-1);
+      return 1;
     }
     count++;
   }
@@ -173,32 +174,33 @@ int main(int argc, char **argv) {
 
   if (argv[2][0] == '0' || argv[2][0] == '-') {
     fprintf(stderr, "Error: Invalid threshold, should be positive\n");
-    exit(-1);
+    return 1;
   }
   if (end != argv[2] + strlen(argv[2])) {
     // TODO: report an error (threshold value is invalid)
     fprintf(stderr, "Error: threshold value is invalid");
+    return 1;
   }
 
   // TODO: open the file
   int fd = open(filename, O_RDWR);
   if (fd < 0) {
     fprintf(stderr, "Error: cannot open file %s\n", filename);
-    exit(-1);
+    return 1;
   }
   // TODO: use fstat to determine the size of the file
   struct stat statbuf;
   int rc = fstat(fd, &statbuf);
   if (rc != 0) {
     fprintf(stderr, "Error: cannot get vaild size of file\n");
-    exit(-1);
+    return 1;
   }
   size_t file_size_in_bytes = statbuf.st_size;
   // TODO: map the file into memory using mmap
   int64_t *data = mmap(NULL, file_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   if (data == MAP_FAILED) {
-    fprintf(stderr, "Error, failure during mapping to the file\n");
-    exit(-1);
+    fprintf(stderr, "Error: failure during mapping to the file\n");
+    return 1;
   }
   // TODO: sort the data!
   merge_sort(data, 0, (size_t)(file_size_in_bytes/ 8), threshold);
@@ -206,12 +208,12 @@ int main(int argc, char **argv) {
   // TODO: unmap and close the file
   if(munmap(data, file_size_in_bytes) == -1) {
     fprintf(stderr, "Error: failing to unmap the file\n");
-    exit(-1);
+    return 1;
   }
   if (close(fd) == -1) {
     fprintf(stderr, "Error: fail to close the file\n");
-    exit(-1);
+    return 1;
   }
   // TODO: exit with a 0 exit code if sort was successful
-  exit(0);
+  return 0;
 }
