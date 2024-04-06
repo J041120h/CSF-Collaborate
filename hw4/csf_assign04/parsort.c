@@ -74,7 +74,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   if (pid1 == -1) {
     // fork failed to start a new process
     // handle the error and exit
-    fprintf(stderr, "Child process failed\n");
+    fprintf(stderr, "Error:child process failed\n");
     exit(EXIT_FAILURE); //exist the child process with faliure
   } else if (pid1 == 0) {
     // this is now in the child process
@@ -86,7 +86,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   if (pid2 == -1) {
     // fork failed to start a new process
     // handle the error and exit
-    fprintf(stderr, "Child process failed\n");
+    fprintf(stderr, "Error:child process failed\n");
     exit(EXIT_FAILURE); //exist the child process with faliure
   } else if (pid2 == 0) {
     // this is now in the child process
@@ -99,16 +99,17 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   pid_t actual_pid1 = waitpid(pid1, &wstatus1, 0);
   if (actual_pid1 == -1) {
     // handle waitpid failure
-      fprintf(stderr, "waitpid failure\n");
+      fprintf(stderr, "Error:waitpid failure\n");
   } else {
     if (!WIFEXITED(wstatus1)) {
       // subprocess crashed, was interrupted, or did not exit normally
-      fprintf(stderr, "Child process exist unsuccessfully\n");
+      fprintf(stderr, "Error:child process exist unsuccessfully\n");
     }
     if (WEXITSTATUS(wstatus1) != 0) {
       // subprocess returned a non-zero exit code
       // if following standard UNIX conventions, this is also an error
-      fprintf(stderr, "Child process exist with error code\n");
+      exit(EXIT_FAILURE); //exist the parent process with faliure
+      fprintf(stderr, "Error:child process exist with error code\n");
     }
   }
 
@@ -116,17 +117,18 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   pid_t actual_pid2 = waitpid(pid2, &wstatus2, 0);
   if (actual_pid2 == -1) {
     // handle waitpid failure
-    fprintf(stderr, "waitpid failure\n");
+    fprintf(stderr, "Error:waitpid failure\n");
   } else {
     if (!WIFEXITED(wstatus2)) {
       // subprocess crashed, was interrupted, or did not exit normally
       // handle as error
-      fprintf(stderr, "Child process exist unsuccessfully\n");
+      fprintf(stderr, "Error:child process exist unsuccessfully\n");
     }
     if (WEXITSTATUS(wstatus2) != 0) {
       // subprocess returned a non-zero exit code
       // if following standard UNIX conventions, this is also an error
-      fprintf(stderr, "Child process exist with error code\n");
+      exit(EXIT_FAILURE); //exist the parent process with faliure
+      fprintf(stderr, "Error:child process exist with error code\n");
     }
   }
 
