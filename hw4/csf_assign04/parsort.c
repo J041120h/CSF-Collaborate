@@ -160,6 +160,10 @@ int main(int argc, char **argv) {
   const char *filename = argv[1];
   char *end;
   size_t threshold = (size_t) strtoul(argv[2], &end, 10);
+  if (argv[2][0] == '0' || argv[2][0] == '-') {
+    fprintf(stderr, "Error: Invalid threshold, should be positive\n");
+    exit(-1);
+  }
   if (end != argv[2] + strlen(argv[2])) {
     // TODO: report an error (threshold value is invalid)
     fprintf(stderr, "Error: threshold value is invalid");
@@ -194,7 +198,6 @@ int main(int argc, char **argv) {
     exit(-1);
   }
   close(fd);
-  fprintf(stdout, "Finished\n");
   // TODO: exit with a 0 exit code if sort was successful
   exit(0);
 }
