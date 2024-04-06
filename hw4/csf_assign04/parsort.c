@@ -154,14 +154,23 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
 int main(int argc, char **argv) {
   // check for correct number of command line arguments
   if (argc != 3) {
-    fprintf(stderr, "Usage: %s <filename> <sequential threshold>\n", argv[0]);
+    fprintf(stderr, "Error: Usage: %s <filename> <sequential threshold>\n", argv[0]);
     return 1;
+  }
+  int count = 0;
+  while (argv[2][count] != '\0') {
+    if (argv[2][count] == '.' || argv[2][count] < '0' || argv[2][count] > '9') {
+      fprintf(stderr, "Error: threshold should be an int\n");
+      exit(-1);
+    }
+    count++;
   }
 
   // process command line arguments
   const char *filename = argv[1];
   char *end;
   size_t threshold = (size_t) strtoul(argv[2], &end, 10);
+
   if (argv[2][0] == '0' || argv[2][0] == '-') {
     fprintf(stderr, "Error: Invalid threshold, should be positive\n");
     exit(-1);
@@ -199,7 +208,10 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Error: failing to unmap the file\n");
     exit(-1);
   }
-  close(fd);
+  if (close(fd) == -1) {
+    fprintf(stderr, "Error: fail to close the file\n");
+    exit(-1);
+  }
   // TODO: exit with a 0 exit code if sort was successful
   exit(0);
 }
