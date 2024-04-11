@@ -9,6 +9,9 @@ class Table {
 private:
   std::string m_name;
   // TODO: add member variables
+  std::map<std::string, std::string> actual;
+  std::map<std::string, std::string> temp;
+  bool lockStatus;
 
   // copy constructor and assignment operator are prohibited
   Table( const Table & );
