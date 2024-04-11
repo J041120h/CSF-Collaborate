@@ -99,7 +99,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   pid_t actual_pid1 = waitpid(pid1, &wstatus1, 0);
   if (actual_pid1 == -1) {
     // handle waitpid failure
-    fprintf(stderr, "Error: waitpid failure\n");
+      fprintf(stderr, "Error: waitpid failure\n");
   } else {
     if (!WIFEXITED(wstatus1)) {
       // subprocess crashed, was interrupted, or did not exit normally
@@ -110,6 +110,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
       // subprocess returned a non-zero exit code
       // if following standard UNIX conventions, this is also an error
       fprintf(stderr, "Error: child process exist with error code\n");
+      exit(EXIT_FAILURE); //exist the parent process with faliure
     }
   }
 
@@ -127,6 +128,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     if (WEXITSTATUS(wstatus2) != 0) {
       // subprocess returned a non-zero exit code
       // if following standard UNIX conventions, this is also an error
+      exit(EXIT_FAILURE); //exist the parent process with faliure
       fprintf(stderr, "Error: child process exist with error code\n");
     }
   }
@@ -197,8 +199,8 @@ int main(int argc, char **argv) {
   // TODO: map the file into memory using mmap
   int64_t *data = mmap(NULL, file_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   if (data == MAP_FAILED) {
-    fprintf(stderr, "Error, failure during mapping to the file\n");
-    exit(-1);
+    fprintf(stderr, "Error: failure during mapping to the file\n");
+    return 1;
   }
   // TODO: sort the data!
   merge_sort(data, 0, (size_t)(file_size_in_bytes/ 8), threshold);
