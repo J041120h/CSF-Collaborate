@@ -6,6 +6,7 @@
 #include "value_stack.h"
 #include "exceptions.h"
 #include "tctest.h"
+#include <iostream>
 
 struct TestObjs
 {
@@ -335,7 +336,7 @@ void test_message_serialization_encode_too_long( TestObjs *objs )
     MessageSerialization::encode( objs->invalid_too_long, s );
     FAIL( "exception was not thrown for too-long encoded message" );
   } catch (InvalidMessage &ex) {
-    // Good
+    std::cout << "End" << std::endl;
   }
 }
 

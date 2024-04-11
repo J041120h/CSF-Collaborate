@@ -112,16 +112,6 @@ bool Message::is_valid() const
   if (!is_num_match()) {
     return false;
   }
-  int length = 0;
-  for (std::vector<std::string>::const_iterator it = m_args.begin(); it != m_args.end(); it++) {
-    if (it->length() == 0) {
-      return false;
-    }
-    length += it->length();
-  }
-  if (length + 1 > MAX_ENCODED_LEN) {
-    return false;
-  }
   if (m_message_type == MessageType::CREATE || m_message_type == MessageType::SET || m_message_type == MessageType::GET || m_message_type == MessageType::LOGIN) {
     for (int i = 0; i < m_args.size(); i++) {
       if(!Message::is_letter(m_args[i][0])) {
