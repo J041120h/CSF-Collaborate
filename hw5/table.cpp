@@ -1,5 +1,6 @@
 #include <cassert>
 #include <exception>
+#include <stdexcept>
 #include "table.h"
 #include "exceptions.h"
 #include "guard.h"
@@ -46,7 +47,7 @@ std::string Table::get( const std::string &key )
   if (actual.find(key) != actual.end()) {
     return actual[key];
   }
-  throw std::runtime_error("InvalidMessage");
+  throw std::invalid_argument("InvalidMessage");
 }
 
 bool Table::has_key( const std::string &key )
