@@ -35,6 +35,11 @@ class Message {
 private:
   MessageType m_message_type;
   std::vector<std::string> m_args;
+  const static std::map<MessageType, int> argument_num;
+
+  static bool is_letter(char c) { return (c >= 'a' && c <= 'z') && (c >= 'A' && c <= 'z');}
+  static bool is_number(char c) { return c >= '0' and c <= '9';}
+  bool is_num_match() const;
 
 public:
   // Maximum encoded message length (including terminator newline character)
@@ -62,6 +67,8 @@ public:
 
   unsigned get_num_args() const { return m_args.size(); }
   std::string get_arg( unsigned i ) const { return m_args.at( i ); }
+
+  
 };
 
 #endif // MESSAGE_H
