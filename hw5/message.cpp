@@ -55,7 +55,7 @@ std::string Message::get_username() const
   if (!this->is_valid()) {
     throw new std::invalid_argument("Invalid argument value\n");
   }
-  return get_arg(1);
+  return get_arg(0);
 }
 
 std::string Message::get_table() const
@@ -66,7 +66,7 @@ std::string Message::get_table() const
   if (!this->is_valid()) {
     throw new InvalidMessage("Invalid argument value\n");
   }
-  return get_arg(1);
+  return get_arg(0);
 }
 
 std::string Message::get_key() const
@@ -77,7 +77,7 @@ std::string Message::get_key() const
   if (!this->is_valid()) {
     throw new InvalidMessage("Invalid argument value\n");
   }
-  return get_arg(2);
+  return get_arg(1);
 }
 
 std::string Message::get_value() const
@@ -88,7 +88,7 @@ std::string Message::get_value() const
   if (!this->is_valid()) {
     throw new InvalidMessage("Invalid argument value\n");
   }
-  return get_arg(1);
+  return get_arg(0);
 }
 
 std::string Message::get_quoted_text() const
@@ -99,7 +99,7 @@ std::string Message::get_quoted_text() const
   if (!this->is_valid()) {
     throw new InvalidMessage("Invalid argument value\n");
   }
-  return get_arg(1);
+  return get_arg(0);
 }
 
 void Message::push_arg( const std::string &arg )
@@ -123,11 +123,11 @@ bool Message::is_valid() const
     return false;
   }
   if (m_message_type == MessageType::CREATE || m_message_type == MessageType::SET || m_message_type == MessageType::GET || m_message_type == MessageType::LOGIN) {
-    for (int i = 1; i < m_args.size(); i++) {
+    for (int i = 0; i < m_args.size(); i++) {
       if(!Message::is_letter(m_args[i][0])) {
         return false;
       }
-      for (int j = 1; j < m_args[i].length(); i++) {
+      for (int j = 1; j < m_args[i].length(); j++) {
         if(!Message::is_letter(m_args[i][j]) && !Message::is_number(m_args[i][j]) && m_args[i][j] != '_') {
           return false;
         }
@@ -135,18 +135,15 @@ bool Message::is_valid() const
     }
   }
   if (m_message_type == MessageType::PUSH || m_message_type == MessageType::DATA) {
-    for (int j = 0; j < m_args[1].length(); j++) {
-      if (m_args[1][j] == ' ') {
+    for (int j = 0; j < m_args[0].length(); j++) {
+      if (m_args[0][j] == ' ') {
         return false;
       }
     }
   }
   if (m_message_type == MessageType::FAILED || m_message_type == MessageType::ERROR) {
-    if (m_args[1][0] != '"' || m_args[1][m_args[1].size()-1] != '"') {
-      return false;
-    }
-    for (int i = 1; i < m_args[1].size() - 1; i++) {
-      if (m_args[1][i] == '"') {
+    for (int i = 0; i < m_args[0].size(); i++) {
+      if (m_args[0][i] == '"') {
         return false;
       }
     }
@@ -156,24 +153,24 @@ bool Message::is_valid() const
 
 bool Message::is_num_match() const {
   std::map<MessageType, int> map = {
-    {MessageType::LOGIN, 2},
-    {MessageType::CREATE, 2},
-    {MessageType::PUSH, 2},
-    {MessageType::POP, 1},
-    {MessageType::TOP, 1},
-    {MessageType::SET, 3},
-    {MessageType::GET, 3},
-    {MessageType::ADD, 1},
-    {MessageType::MUL, 1},
-    {MessageType::SUB, 1},
-    {MessageType::DIV, 1},
-    {MessageType::BEGIN, 1},
-    {MessageType::COMMIT, 1},
-    {MessageType::BYE, 1},
-    {MessageType::OK, 1},
-    {MessageType::FAILED, 2},
-    {MessageType::ERROR, 2},
-    {MessageType::DATA, 2}
+    {MessageType::LOGIN, 1},
+    {MessageType::CREATE, 1},
+    {MessageType::PUSH, 1},
+    {MessageType::POP, 0},
+    {MessageType::TOP, 0},
+    {MessageType::SET, 2},
+    {MessageType::GET, 2},
+    {MessageType::ADD, 0},
+    {MessageType::MUL, 0},
+    {MessageType::SUB, 0},
+    {MessageType::DIV, 0},
+    {MessageType::BEGIN, 0},
+    {MessageType::COMMIT, 0},
+    {MessageType::BYE, 0},
+    {MessageType::OK, 0},
+    {MessageType::FAILED, 1},
+    {MessageType::ERROR, 1},
+    {MessageType::DATA, 1}
   };
   if (map[m_message_type] != m_args.size()) {
     return false;
