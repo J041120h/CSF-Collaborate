@@ -35,7 +35,6 @@ class Message {
 private:
   MessageType m_message_type;
   std::vector<std::string> m_args;
-  const static std::map<MessageType, int> argument_num;
 
   static bool is_letter(char c) { return (c >= 'a' && c <= 'z') && (c >= 'A' && c <= 'z');}
   static bool is_number(char c) { return c >= '0' and c <= '9';}
