@@ -47,7 +47,7 @@ std::string Table::get( const std::string &key )
   if (actual.find(key) != actual.end()) {
     return actual[key];
   }
-  throw std::invalid_argument("InvalidMessage");
+  throw InvalidMessage("InvalidMessage");
 }
 
 bool Table::has_key( const std::string &key )

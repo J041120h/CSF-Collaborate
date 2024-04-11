@@ -27,7 +27,7 @@ std::string ValueStack::get_top() const
 {
   // TODO: implement
   if (storage.empty()) {
-    throw std::runtime_error("OperationException");
+    throw OperationException("OperationException");
   } else {
     return storage.top();
   }
@@ -37,7 +37,7 @@ void ValueStack::pop()
 {
   // TODO: implement
   if (storage.empty()) {
-    throw std::runtime_error("OperationException");
+    throw OperationException("OperationException");
   } else {
     storage.pop();
   }
