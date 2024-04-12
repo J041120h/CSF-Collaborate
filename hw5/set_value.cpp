@@ -46,7 +46,6 @@ int main(int argc, char **argv)
     rio_t rio;
     char buf[2048];
     rio_readinitb(&rio, fd);
-    ssize_t n = rio_readlineb(&rio, buf, sizeof(buf));
     Message responseMessage;
     try {
       const std::string message(buf);

@@ -33,7 +33,13 @@ int main(int argc, char **argv) {
   Message setMessage = Message(MessageType::SET, {table, key});
   Message commitMessage = Message(MessageType::COMMIT);
   Message byeMessage = Message(MessageType::BYE);
-  std::vector<Message> messageList = {beginMessage, logMessage, pushMessage, setMessage, commitMessage, byeMessage};
+  std::vector<Message> messageList;
+  if (use_transaction) {
+    messageList = {beginMessage, logMessage, pushMessage, setMessage, commitMessage, byeMessage};
+  } else {
+    messageList = {logMessage, pushMessage, setMessage, byeMessage};
+  }
+  
   int fd = open_clientfd(hostname.data(), port.data());
   if (fd < 0) {
     std::cerr << "Error: cannot connect to server" << std::endl;
@@ -53,7 +59,6 @@ int main(int argc, char **argv) {
     rio_t rio;
     char buf[2048];
     rio_readinitb(&rio, fd);
-    ssize_t n = rio_readlineb(&rio, buf, sizeof(buf));
     Message responseMessage;
     try {
       const std::string message(buf);
