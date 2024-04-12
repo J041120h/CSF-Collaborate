@@ -23,7 +23,7 @@ int main(int argc, char **argv)
   // TODO: implement
   messages.push_back(Message(MessageType::LOGIN, {username}));
   messages.push_back(Message(MessageType::GET, {table, key}));
-  messages.push_back(Message(MessageType::POP, {}));
+  messages.push_back(Message(MessageType::TOP, {}));
   messages.push_back(Message(MessageType::BYE, {}));
 
   int fd = open_clientfd(hostname.data(), port.data());

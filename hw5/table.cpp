@@ -33,6 +33,7 @@ void Table::unlock()
 bool Table::trylock()
 {
   // TODO: implement
+  return false;
 }
 
 void Table::set( const std::string &key, const std::string &value )
