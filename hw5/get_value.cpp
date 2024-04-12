@@ -61,10 +61,10 @@ int main(int argc, char **argv)
       continue;
     } else if (response.get_message_type() == MessageType::ERROR) {
       close(fd);
-      std::cout << response.get_arg(0);
+      std::cerr << "Error: " << response.get_arg(0) << "\n";
       exit(-1);
     } else if (response.get_message_type() == MessageType::FAILED) {
-      std::cout << response.get_arg(0);
+      std::cerr << "Error: " << response.get_arg(0) << "\n";
       close(fd);
       exit(-5);
     } else if (response.get_message_type() == MessageType::DATA) {
