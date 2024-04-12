@@ -31,7 +31,8 @@ int main(int argc, char **argv)
       std::cerr << "Error: couldn't connect to the server\n";
       close(fd);
       exit(-2);
-    }
+  }
+
   for (std::vector<Message>::iterator it = messages.begin(); it != messages.end(); ++it) {
     std::string encoded_message = "";
     try {
@@ -67,7 +68,7 @@ int main(int argc, char **argv)
       close(fd);
       exit(-5);
     } else if (response.get_message_type() == MessageType::DATA) {
-      messages.push_back(Message(MessageType::BYE, {}));
+      std::cout << response.get_value() << "\n";
       continue;
     } else {
       std::cerr << "Error: fail to response";
