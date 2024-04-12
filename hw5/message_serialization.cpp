@@ -8,6 +8,7 @@
 #include "message_serialization.h"
 #include <vector>
 #include <string>
+#include <iostream>
 
 void MessageSerialization::encode( const Message &msg, std::string &encoded_msg )
 {
