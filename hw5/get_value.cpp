@@ -67,11 +67,8 @@ int main(int argc, char **argv)
       close(fd);
       exit(-5);
     } else if (response.get_message_type() == MessageType::DATA) {
-      Message bye = Message(MessageType::BYE);
-      MessageSerialization::encode(bye, encoded_message);
-      rio_writen(fd, encoded_message.data(), sizeof(encoded_message));
-      std::cout << response.get_arg(0);
-      exit(0);
+      messages.push_back(Message(MessageType::BYE, {}));
+      continue;
     } else {
       std::cerr << "Error: fail to response";
       close(fd);
