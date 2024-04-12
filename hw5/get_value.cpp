@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
   int fd = open_clientfd(hostname.data(), port.data());
   if (fd < 0) {
-      std::cerr << "Error: ouldn't connect to the server\n";
+      std::cerr << "Error: couldn't connect to the server\n";
       close(fd);
       exit(-2);
     }
