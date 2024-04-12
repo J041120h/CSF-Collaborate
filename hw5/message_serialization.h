@@ -8,6 +8,7 @@ namespace MessageSerialization {
   void decode(const std::string &encoded_msg, Message &msg);
   void processNormal(const std::string& encoded_msg_, Message &msg, int expectedArgument);
   void processServerMessage(const std::string& encoded_msg_, Message &msg);
+  bool checkWhiteSpace(const std::string& encoded_msg_, int index);
 };
 
 #endif // MESSAGE_SERIALIZATION_H

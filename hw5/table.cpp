@@ -44,8 +44,8 @@ void Table::set( const std::string &key, const std::string &value )
 std::string Table::get( const std::string &key )
 {
   // TODO: implement
-  if (actual.find(key) != actual.end()) {
-    return actual[key];
+  if (temp.find(key) != temp.end()) {
+    return temp[key];
   }
   throw InvalidMessage("InvalidMessage");
 }
@@ -53,7 +53,7 @@ std::string Table::get( const std::string &key )
 bool Table::has_key( const std::string &key )
 {
   // TODO: implement
-  return actual.find(key) != actual.end();
+  return temp.find(key) != temp.end();
 }
 
 void Table::commit_changes()

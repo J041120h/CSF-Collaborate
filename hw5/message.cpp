@@ -31,9 +31,7 @@ Message::~Message()
 Message &Message::operator=( const Message &rhs )
 {
   this->m_message_type = rhs.m_message_type;
-  for (std::vector<std::string>::const_iterator it = rhs.m_args.begin(); it != rhs.m_args.end(); it++) {
-    this->push_arg(*it);
-  }
+  this->m_args = rhs.m_args;
   return *this;
 }
 
@@ -50,10 +48,10 @@ void Message::set_message_type(MessageType message_type)
 std::string Message::get_username() const
 {
   if (m_message_type != MessageType::LOGIN) {
-    throw new std::invalid_argument("Only login message have username field\n");
+    throw std::invalid_argument("Only login message have username field\n");
   }
   if (!this->is_valid()) {
-    throw new std::invalid_argument("Invalid argument value\n");
+    throw InvalidMessage("Invalid argument value\n");
   }
   return get_arg(0);
 }
@@ -61,10 +59,10 @@ std::string Message::get_username() const
 std::string Message::get_table() const
 {
   if (m_message_type != MessageType::SET && m_message_type != MessageType::GET && m_message_type != MessageType::CREATE) {
-    throw new std::invalid_argument("Only set and get message have table field\n");
+    throw std::invalid_argument("Only set and get message have table field\n");
   }
   if (!this->is_valid()) {
-    throw new InvalidMessage("Invalid argument value\n");
+    throw InvalidMessage("Invalid argument value\n");
   }
   return get_arg(0);
 }
@@ -72,10 +70,10 @@ std::string Message::get_table() const
 std::string Message::get_key() const
 {
   if (m_message_type != MessageType::SET && m_message_type != MessageType::GET) {
-    throw new std::invalid_argument("Only set and get message have key field\n");
+    throw std::invalid_argument("Only set and get message have key field\n");
   }
   if (!this->is_valid()) {
-    throw new InvalidMessage("Invalid argument value\n");
+    throw InvalidMessage("Invalid argument value\n");
   }
   return get_arg(1);
 }
@@ -83,10 +81,10 @@ std::string Message::get_key() const
 std::string Message::get_value() const
 {
   if (m_message_type != MessageType::PUSH && m_message_type != MessageType::DATA) {
-    throw new std::invalid_argument("Only push and data message have value field\n");
+    throw std::invalid_argument("Only push and data message have value field\n");
   }
   if (!this->is_valid()) {
-    throw new InvalidMessage("Invalid argument value\n");
+    throw InvalidMessage("Invalid argument value\n");
   }
   return get_arg(0);
 }
@@ -94,10 +92,10 @@ std::string Message::get_value() const
 std::string Message::get_quoted_text() const
 {
   if (m_message_type != MessageType::FAILED && m_message_type != MessageType::ERROR) {
-    throw new std::invalid_argument("Only failed and error message have quoted_text field\n");
+    throw std::invalid_argument("Only failed and error message have quoted_text field\n");
   }
   if (!this->is_valid()) {
-    throw new InvalidMessage("Invalid argument value\n");
+    throw InvalidMessage("Invalid argument value\n");
   }
   return get_arg(0);
 }
@@ -113,11 +111,11 @@ bool Message::is_valid() const
     return false;
   }
   if (m_message_type == MessageType::CREATE || m_message_type == MessageType::SET || m_message_type == MessageType::GET || m_message_type == MessageType::LOGIN) {
-    for (int i = 0; i < m_args.size(); i++) {
+    for (int i = 0; i < (int)m_args.size(); i++) {
       if(!Message::is_letter(m_args[i][0])) {
         return false;
       }
-      for (int j = 1; j < m_args[i].length(); j++) {
+      for (int j = 1; j < (int)m_args[i].length(); j++) {
         if(!Message::is_letter(m_args[i][j]) && !Message::is_number(m_args[i][j]) && m_args[i][j] != '_') {
           return false;
         }
@@ -125,14 +123,14 @@ bool Message::is_valid() const
     }
   }
   if (m_message_type == MessageType::PUSH || m_message_type == MessageType::DATA) {
-    for (int j = 0; j < m_args[0].length(); j++) {
+    for (int j = 0; j < (int)m_args[0].length(); j++) {
       if (m_args[0][j] == ' ') {
         return false;
       }
     }
   }
   if (m_message_type == MessageType::FAILED || m_message_type == MessageType::ERROR) {
-    for (int i = 0; i < m_args[0].size(); i++) {
+    for (int i = 0; i < (int)m_args[0].size(); i++) {
       if (m_args[0][i] == '"') {
         return false;
       }
@@ -162,7 +160,7 @@ bool Message::is_num_match() const {
     {MessageType::ERROR, 1},
     {MessageType::DATA, 1}
   };
-  if (map[m_message_type] != m_args.size()) {
+  if (map[m_message_type] != (int)m_args.size()) {
     return false;
   }
   return true;

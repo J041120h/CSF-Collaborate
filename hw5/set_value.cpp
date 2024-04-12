@@ -1,4 +1,6 @@
 #include <iostream>
+#include "message.h"
+#include "csapp.h"
 
 int main(int argc, char **argv)
 {
@@ -15,4 +17,6 @@ int main(int argc, char **argv)
   std::string value = argv[6];
 
   // TODO: implement
+  Message logMessage = Message(MessageType::LOGIN, {username});
+  Message keyMessage = Message()
 }

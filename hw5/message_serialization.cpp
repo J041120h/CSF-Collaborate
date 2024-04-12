@@ -38,81 +38,156 @@ void MessageSerialization::encode( const Message &msg, std::string &encoded_msg 
   } else {
     encoded_msg += " ";
   }
-  for (int i = 0; i < msg.get_num_args(); i++) {
+  for (int i = 0; i < (int)msg.get_num_args(); i++) {
+    if (msg.get_message_type() == MessageType::FAILED || msg.get_message_type() == MessageType::ERROR) {
+      encoded_msg += "\"";
+    }
     encoded_msg += msg.get_arg(i);
-    if (i == msg.get_num_args() - 1) {
+    if (msg.get_message_type() == MessageType::FAILED || msg.get_message_type() == MessageType::ERROR) {
+      encoded_msg += "\"";
+    }
+    if (i == (int)msg.get_num_args() - 1) {
       encoded_msg += "\n";
     } else {
       encoded_msg += " ";
     }
   }
   if (encoded_msg.length() > Message::MAX_ENCODED_LEN) {
-    throw new InvalidMessage("Encoded string too long\n");
+    throw InvalidMessage("Encoded string too long\n");
   }
+}
+
+bool MessageSerialization::checkWhiteSpace(const std::string &encoded_msg_, int index) {
+  for (int i = 0; i < index; i++) {
+    if (encoded_msg_[i] != ' ') {
+      return false;
+    }
+  }
+  return true;
 }
 
 void MessageSerialization::decode( const std::string &encoded_msg_, Message &msg )
 {
+  if (encoded_msg_.length() > Message::MAX_ENCODED_LEN || encoded_msg_[encoded_msg_.length() - 1] != '\n') {
+    throw InvalidMessage("Invalid encoded message\n");
+  }
+  Message empty;
+  msg = empty;
   std::string word;
+  size_t index = 0;
   // TODO: implement
-  if (encoded_msg_.find("LOGIN") == 0) {
-    processNormal(encoded_msg_, msg, 1);
+  if ((index = encoded_msg_.find("LOGIN")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 1);
     msg.set_message_type(MessageType::LOGIN);
-  } else if (encoded_msg_.find("CREATE") == 0) {
-    processNormal(encoded_msg_, msg, 1);
+  } else if ((index = encoded_msg_.find("CREATE")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 1);
     msg.set_message_type(MessageType::CREATE);
-  } else if (encoded_msg_.find("PUSH") == 0) {
-    processNormal(encoded_msg_, msg, 1);
+  } else if ((index = encoded_msg_.find("PUSH")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 1);
     msg.set_message_type(MessageType::PUSH);
-  } else if (encoded_msg_.find("POP") == 0) {
-    processNormal(encoded_msg_, msg, 0);
+  } else if ((index = encoded_msg_.find("POP")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 0);
     msg.set_message_type(MessageType::POP);
-  } else if (encoded_msg_.find("TOP") == 0) {
-    processNormal(encoded_msg_, msg, 0);
+  } else if ((index = encoded_msg_.find("TOP")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 0);
     msg.set_message_type(MessageType::TOP);
-  } else if (encoded_msg_.find("SET") == 0) {
-    processNormal(encoded_msg_, msg, 2);
+  } else if ((index = encoded_msg_.find("SET")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 2);
     msg.set_message_type(MessageType::SET);
-  } else if (encoded_msg_.find("GET") == 0) {
-    processNormal(encoded_msg_, msg, 2);
+  } else if ((index = encoded_msg_.find("GET")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 2);
     msg.set_message_type(MessageType::GET);
-  } else if (encoded_msg_.find("ADD") == 0) {
-    processNormal(encoded_msg_, msg, 0);
+  } else if ((index = encoded_msg_.find("ADD")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 0);
     msg.set_message_type(MessageType::ADD);
-  } else if (encoded_msg_.find("MUL") == 0) {
-    processNormal(encoded_msg_, msg, 0);
+  } else if ((index = encoded_msg_.find("MUL")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 0);
     msg.set_message_type(MessageType::MUL);
-  } else if (encoded_msg_.find("SUB") == 0) {
-    processNormal(encoded_msg_, msg, 0);
+  } else if ((index = encoded_msg_.find("SUB")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 0);
     msg.set_message_type(MessageType::SUB);
-  } else if (encoded_msg_.find("DIV") == 0) {
-    processNormal(encoded_msg_, msg, 0);
+  } else if ((index = encoded_msg_.find("DIV")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 0);
     msg.set_message_type(MessageType::DIV);
-  } else if (encoded_msg_.find("BEGIN") == 0) {
-    processNormal(encoded_msg_, msg, 0);
+  } else if ((index = encoded_msg_.find("BEGIN")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 0);
     msg.set_message_type(MessageType::BEGIN);
-  } else if (encoded_msg_.find("COMMIT") == 0) {
-    processNormal(encoded_msg_, msg, 0);
+  } else if ((index = encoded_msg_.find("COMMIT")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 0);
     msg.set_message_type(MessageType::COMMIT);
-  } else if (encoded_msg_.find("BYE") == 0) {
-    processNormal(encoded_msg_, msg, 0);
+  } else if ((index = encoded_msg_.find("BYE")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 0);
     msg.set_message_type(MessageType::BYE);
-  } else if (encoded_msg_.find("OK") == 0) {
-    processNormal(encoded_msg_, msg, 1);
+  } else if ((index = encoded_msg_.find("OK")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 1);
     msg.set_message_type(MessageType::LOGIN);
-  } else if (encoded_msg_.find("FAILED") == 0) {
-    processServerMessage(encoded_msg_, msg);
+  } else if ((index = encoded_msg_.find("FAILED")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processServerMessage(encoded_msg_, msg);
     msg.set_message_type(MessageType::FAILED);
-  } else if (encoded_msg_.find("ERROR") == 0) {
-    processServerMessage(encoded_msg_, msg);
+  } else if ((index = encoded_msg_.find("ERROR")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processServerMessage(encoded_msg_, msg);
     msg.set_message_type(MessageType::ERROR);
-  } else if (encoded_msg_.find("DATA") == 0) {
-    processNormal(encoded_msg_, msg, 1);
+  } else if ((index = encoded_msg_.find("DATA")) != std::string::npos) {
+    if (!checkWhiteSpace(encoded_msg_, index)) {
+      throw InvalidMessage("Encoded string fail to start with appropriate word\n");
+    }
+    MessageSerialization::processNormal(encoded_msg_, msg, 1);
     msg.set_message_type(MessageType::DATA);
   }
 }
 
-void processNormal(const std::string& encoded_msg_, Message &msg, int expectedArgument) {
+void MessageSerialization::processNormal(const std::string& encoded_msg_, Message &msg, int expectedArgument) {
     std::istringstream iss(encoded_msg_);
     std::vector<std::string> words;
     std::string word;
@@ -124,11 +199,11 @@ void processNormal(const std::string& encoded_msg_, Message &msg, int expectedAr
     }
 
     // Check if there are more than two words
-    if (words.size() > expectedArgument) {
+    if ((int)words.size() > expectedArgument) {
         throw InvalidMessage("Incorrect Message with more than expected arguments");
     }
     // Handle the case where there is only one word or exactly two words
-    if (words.size() == expectedArgument) {
+    if ((int)words.size() == expectedArgument) {
         for (int i = 0; i < expectedArgument; i++){
           msg.push_arg(words[i]);
         }
@@ -138,8 +213,8 @@ void processNormal(const std::string& encoded_msg_, Message &msg, int expectedAr
     }
 }
 
-void processServerMessage(const std::string& encoded_msg_, Message &msg) {
-  std::istringstream iss(encoded_msg_);
+void MessageSerialization::processServerMessage(const std::string& encoded_msg_, Message &msg) {
+    std::istringstream iss(encoded_msg_);
     std::string token;
     std::vector<std::string> words;
 
@@ -161,9 +236,9 @@ void processServerMessage(const std::string& encoded_msg_, Message &msg) {
               break;
           }
       }
-      words.push_back(quotedWord);
+      words.push_back(quotedWord.substr(1, quotedWord.length() - 2));
       } else {
-          words.push_back(token);
+          words.push_back(token.substr(1, token.length() - 2));
       }
 
     // Check number of words against expected arguments
