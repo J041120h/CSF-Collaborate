@@ -18,5 +18,5 @@ int main(int argc, char **argv)
 
   // TODO: implement
   Message logMessage = Message(MessageType::LOGIN, {username});
-  Message keyMessage = Message()
+  Message keyMessage = Message();
 }

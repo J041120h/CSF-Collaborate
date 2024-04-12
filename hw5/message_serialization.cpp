@@ -164,8 +164,8 @@ void MessageSerialization::decode( const std::string &encoded_msg_, Message &msg
     if (!checkWhiteSpace(encoded_msg_, index)) {
       throw InvalidMessage("Encoded string fail to start with appropriate word\n");
     }
-    MessageSerialization::processNormal(encoded_msg_, msg, 1);
-    msg.set_message_type(MessageType::LOGIN);
+    MessageSerialization::processNormal(encoded_msg_, msg, 0);
+    msg.set_message_type(MessageType::OK);
   } else if ((index = encoded_msg_.find("FAILED")) != std::string::npos) {
     if (!checkWhiteSpace(encoded_msg_, index)) {
       throw InvalidMessage("Encoded string fail to start with appropriate word\n");

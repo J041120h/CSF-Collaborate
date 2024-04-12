@@ -47,7 +47,7 @@ std::string Table::get( const std::string &key )
   if (temp.find(key) != temp.end()) {
     return temp[key];
   }
-  throw InvalidMessage("InvalidMessage");
+  throw InvalidMessage("Error: no such element");
 }
 
 bool Table::has_key( const std::string &key )
