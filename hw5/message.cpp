@@ -111,7 +111,7 @@ bool Message::is_valid() const
     return false;
   }
   if (m_message_type == MessageType::CREATE || m_message_type == MessageType::SET || m_message_type == MessageType::GET || m_message_type == MessageType::LOGIN) {
-    for (int i = 0; i < (int)m_args.size(); i++) {
+    for (int i = 0; i < (int)m_args.size(); i++) { //for value argument, check valid chars
       if(!Message::is_letter(m_args[i][0])) {
         return false;
       }
@@ -123,14 +123,14 @@ bool Message::is_valid() const
     }
   }
   if (m_message_type == MessageType::PUSH || m_message_type == MessageType::DATA) {
-    for (int j = 0; j < (int)m_args[0].length(); j++) {
+    for (int j = 0; j < (int)m_args[0].length(); j++) { //for PUSH and DATA, check no whitespace
       if (m_args[0][j] == ' ') {
         return false;
       }
     }
   }
   if (m_message_type == MessageType::FAILED || m_message_type == MessageType::ERROR) {
-    for (int i = 0; i < (int)m_args[0].size(); i++) {
+    for (int i = 0; i < (int)m_args[0].size(); i++) { //for message in quotation mark, confirm no quotation mark in message
       if (m_args[0][i] == '"') {
         return false;
       }
@@ -139,7 +139,7 @@ bool Message::is_valid() const
   return true;
 }
 
-bool Message::is_num_match() const {
+bool Message::is_num_match() const { //check if number of argument matched
   std::map<MessageType, int> map = {
     {MessageType::LOGIN, 1},
     {MessageType::CREATE, 1},

@@ -13,7 +13,7 @@
 void MessageSerialization::encode( const Message &msg, std::string &encoded_msg )
 {
   encoded_msg = "";
-  std::map<MessageType, std::string> map = {
+  std::map<MessageType, std::string> map = { //map the message type to starting substring
     {MessageType::LOGIN, "LOGIN"},
     {MessageType::CREATE, "CREATE"},
     {MessageType::PUSH, "PUSH"},
@@ -45,7 +45,7 @@ void MessageSerialization::encode( const Message &msg, std::string &encoded_msg 
     }
     encoded_msg += msg.get_arg(i);
     if (msg.get_message_type() == MessageType::FAILED || msg.get_message_type() == MessageType::ERROR) {
-      encoded_msg += "\"";
+      encoded_msg += "\""; //add quotation marks for FAILED and ERROR command
     }
     if (i == (int)msg.get_num_args() - 1) {
       encoded_msg += "\n";
@@ -53,13 +53,13 @@ void MessageSerialization::encode( const Message &msg, std::string &encoded_msg 
       encoded_msg += " ";
     }
   }
-  if (encoded_msg.length() > Message::MAX_ENCODED_LEN) {
+  if (encoded_msg.length() > Message::MAX_ENCODED_LEN) { //check length
     throw InvalidMessage("Encoded string too long\n");
   }
 }
 
 bool MessageSerialization::checkWhiteSpace(const std::string &encoded_msg_, int index) {
-  for (int i = 0; i < index; i++) {
+  for (int i = 0; i < index; i++) { //check if message start with appropriate starting substring (take white space into consideration)
     if (encoded_msg_[i] != ' ') {
       return false;
     }
@@ -71,12 +71,12 @@ void MessageSerialization::decode( const std::string &encoded_msg_, Message &msg
 {
   if (encoded_msg_.length() > Message::MAX_ENCODED_LEN || encoded_msg_[encoded_msg_.length() - 1] != '\n') {
     throw InvalidMessage("Invalid encoded message\n");
-  }
+  } //if exceeding max length, throw error
   Message empty;
   msg = empty;
   std::string word;
   size_t index = 0;
-  // TODO: implement
+  // determine message type and parse the line 
   if ((index = encoded_msg_.find("LOGIN")) != std::string::npos) {
     if (!checkWhiteSpace(encoded_msg_, index)) {
       throw InvalidMessage("Encoded string fail to start with appropriate word\n");
@@ -185,6 +185,8 @@ void MessageSerialization::decode( const std::string &encoded_msg_, Message &msg
     }
     MessageSerialization::processNormal(encoded_msg_, msg, 1);
     msg.set_message_type(MessageType::DATA);
+  } else {
+    throw InvalidMessage("Encoded string fail to start with appropriate word\n");
   }
 }
 

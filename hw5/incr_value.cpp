@@ -29,15 +29,17 @@ int main(int argc, char **argv) {
   // TODO: implement
   Message beginMessage = Message(MessageType::BEGIN);
   Message logMessage = Message(MessageType::LOGIN, {username});
+  Message getMessage = Message(MessageType::GET, {table, key});
   Message pushMessage = Message(MessageType::PUSH, {"1"});
   Message setMessage = Message(MessageType::SET, {table, key});
+  Message addMessage = Message(MessageType::ADD);
   Message commitMessage = Message(MessageType::COMMIT);
   Message byeMessage = Message(MessageType::BYE);
   std::vector<Message> messageList;
   if (use_transaction) {
-    messageList = {beginMessage, logMessage, pushMessage, setMessage, commitMessage, byeMessage};
+    messageList = {logMessage, beginMessage, getMessage, pushMessage, addMessage, setMessage, commitMessage, byeMessage};
   } else {
-    messageList = {logMessage, pushMessage, setMessage, byeMessage};
+    messageList = {logMessage, getMessage, pushMessage, addMessage, setMessage, byeMessage};
   }
   
   int fd = open_clientfd(hostname.data(), port.data());
@@ -60,23 +62,24 @@ int main(int argc, char **argv) {
     char buf[2048];
     rio_readinitb(&rio, fd);
     Message responseMessage;
+    ssize_t n = rio_readlineb(&rio, buf, sizeof(buf));
     try {
       const std::string message(buf);
       MessageSerialization::decode(message, responseMessage);
     } catch (InvalidMessage &ex) {
       std::cerr << "Error: cannot decode message" << std::endl;
-      return -1;
+      exit(-1);
     }
     if (!responseMessage.is_valid()) {
       std::cerr << "Error: invalid reply message" << std::endl;
-      return -1;
+      exit(-1);
     }
     if (responseMessage.get_message_type() == MessageType::FAILED) {
       std::cerr << "Error: " << responseMessage.get_arg(0) << std::endl;
-      return -1;
+      exit(-1);
     } else if (responseMessage.get_message_type() == MessageType::ERROR) {
       std::cerr << "Error:" << responseMessage.get_arg(0) << std::endl;
-      return -1;
+      exit(-1);
     }
   }
   return 0;

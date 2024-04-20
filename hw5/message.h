@@ -36,8 +36,8 @@ private:
   MessageType m_message_type;
   std::vector<std::string> m_args;
 
-  static bool is_letter(char c) { return (c >= 'a' && c <= 'z') && (c >= 'A' && c <= 'z');}
-  static bool is_number(char c) { return c >= '0' and c <= '9';}
+  static bool is_letter(char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'z');}
+  static bool is_number(char c) { return c >= '0' and c <= '9';} //helper functions for deciding type of char
   bool is_num_match() const;
 
 public:

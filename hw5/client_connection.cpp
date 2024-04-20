@@ -16,12 +16,15 @@ ClientConnection::ClientConnection( Server *server, int client_fd )
 
 ClientConnection::~ClientConnection()
 {
-  // TODO: implement
+  delete m_server;
 }
 
 void ClientConnection::chat_with_client()
 {
-  // TODO: implement
+  while (true) {
+    char buf[1024];
+    
+  }
 }
 
 // TODO: additional member functions
