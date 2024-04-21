@@ -10,7 +10,7 @@
 class Server {
 private:
   // TODO: add member variables
-  std::vector<Table> tables;
+  std::vector<Table*> tables;
   int server_fd;
   // copy constructor and assignment operator are prohibited
   Server( const Server & );

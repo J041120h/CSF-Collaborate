@@ -16,7 +16,7 @@ ClientConnection::ClientConnection( Server *server, int client_fd )
 
 ClientConnection::~ClientConnection()
 {
-  delete m_server;
+  close(m_client_fd);
 }
 
 void ClientConnection::chat_with_client()

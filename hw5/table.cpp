@@ -37,6 +37,7 @@ bool Table::trylock()
     int result = pthread_mutex_trylock(&lockStatus);
 
     if (result == 0) {
+        pthread_mutex_lock(&lockStatus);
         // Do work while the mutex is locked
         return true; // Indicate success
     } else if (result == EBUSY) {
