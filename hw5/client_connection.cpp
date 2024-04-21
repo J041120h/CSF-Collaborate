@@ -40,13 +40,14 @@ void ClientConnection::chat_with_client()
       MessageSerialization::decode(buf, message); //potentially throw invalidMessage when input message is invalid
       if (message.get_message_type() == MessageType::BEGIN) {
         if (transaction) {
-          throw FailedTransaction("Cannot call begin again in transaction mode\n");
+          throw FailedTransaction("Cannot call begin again in transaction mode");
         }
         transaction = true;
         responseMessage = Message(MessageType::OK, {});
       } else if (message.get_message_type() == MessageType::LOGIN) {
         responseMessage = Message(MessageType::OK, {});
       } else if (message.get_message_type() == MessageType::CREATE) {
+        std::cout << transaction << std::endl;
         std::string table = message.get_table();
         if (m_server->getTable(table) != nullptr) {
           throw InvalidMessage("Try to create a existing table");
@@ -60,9 +61,10 @@ void ClientConnection::chat_with_client()
         }
         Table* tableObject = new Table(message.get_table());
         if (transaction) {
+          std::cout << "enter transaction" << std::endl;
           new_tables.push_back(tableObject);
           if(!tableObject->trylock()) {
-            throw FailedTransaction("Transaction Failed\n");
+            throw FailedTransaction("Transaction Failed");
           }
           std::cout << "lock finished" << std::endl;
         } else {
@@ -94,11 +96,11 @@ void ClientConnection::chat_with_client()
           if (!temp) {
             Table* tableptr = m_server->getTable(table);
             if (tableptr == nullptr) {
-              throw InvalidMessage("Try to modify an unexisting table\n");
+              throw InvalidMessage("Try to modify an unexisting table");
             }
             if (std::find(modified_tables.begin(), modified_tables.end(), table) == modified_tables.end()) {
               if (!tableptr->trylock()) {
-                throw FailedTransaction("Table cannot get locked\n");
+                throw FailedTransaction("Table cannot get locked");
               }
               modified_tables.push_back(table);
             }
@@ -108,7 +110,7 @@ void ClientConnection::chat_with_client()
           std::cout << table << std::endl;
           Table* tableptr = m_server->getTable(table);
           if (tableptr == nullptr) {
-            throw InvalidMessage("Try to modify an unexisting table\n");
+            throw InvalidMessage("Try to modify an unexisting table");
           }
           tableptr->lock();
           tableptr->set(key, value);
@@ -123,7 +125,7 @@ void ClientConnection::chat_with_client()
           for (std::vector<Table*>::iterator it = new_tables.begin(); it != new_tables.end(); it++) {
             if ((*it)->get_name() == table) {
               if (!(*it)->has_key(key)) {
-                throw InvalidMessage("Input key unexist in table\n");
+                throw InvalidMessage("Input key unexist in table");
               }
               operand_stack.push((*it)->get(key));
               temp = true;
@@ -132,28 +134,28 @@ void ClientConnection::chat_with_client()
           if (!temp) {
             Table* tableptr = m_server->getTable(table);
             if (tableptr == nullptr && !temp) {
-              throw InvalidMessage("Try to access an unexisting table\n");
+              throw InvalidMessage("Try to access an unexisting table");
             }
             if (std::find(modified_tables.begin(), modified_tables.end(), table) == modified_tables.end()) {
               if (!tableptr->trylock()) {
-                throw FailedTransaction("Table cannot get locked\n");
+                throw FailedTransaction("Table cannot get locked");
               }
               modified_tables.push_back(table);
             }
             if (!tableptr->has_key(key)) {
-              throw InvalidMessage("Input key unexist in table\n");
+              throw InvalidMessage("Input key unexist in table");
             }
             operand_stack.push(tableptr->get(key)); 
           }      
         } else {
           Table* tableptr = m_server->getTable(table);
           if (tableptr == nullptr) {
-            throw InvalidMessage("Try to access an unexisting table\n");
+            throw InvalidMessage("Try to access an unexisting table");
           }
           tableptr->lock();
           if (!tableptr->has_key(key)) {
             tableptr->unlock();
-            throw InvalidMessage("Input key unexist in table\n");
+            throw InvalidMessage("Input key unexist in table");
           }
           operand_stack.push(tableptr->get(key));
           tableptr->unlock();
@@ -165,10 +167,12 @@ void ClientConnection::chat_with_client()
         std::string value2 = operand_stack.get_top();
         operand_stack.pop();
         std::stringstream temp;
-        temp << value1 << value2;
+        temp << value1 << " " << value2;
         int first = 0;
         int second = 0;
-        temp >> first >> second;
+        if (!(temp >> first >> second)) {
+          throw OperationException("No two values");
+        }
         int sum = first + second;
         operand_stack.push(std::to_string(sum));
         responseMessage = Message(MessageType::OK, {});
@@ -178,10 +182,12 @@ void ClientConnection::chat_with_client()
         std::string value2 = operand_stack.get_top();
         operand_stack.pop();
         std::stringstream temp;
-        temp << value1 << value2;
+        temp << value1 << " " << value2;
         int first = 0;
         int second = 0;
-        temp >> first >> second;
+        if (!(temp >> first >> second)) {
+          throw OperationException("No two values");
+        }
         int mul = first * second;
         operand_stack.push(std::to_string(mul));
         responseMessage = Message(MessageType::OK, {});
@@ -191,10 +197,12 @@ void ClientConnection::chat_with_client()
         std::string value2 = operand_stack.get_top();
         operand_stack.pop();
         std::stringstream temp;
-        temp << value1 << value2;
+        temp << value1 << " " << value2;
         int first = 0;
         int second = 0;
-        temp >> first >> second;
+        if (!(temp >> first >> second)) {
+          throw OperationException("No two values");
+        }
         int dif = second - first;
         operand_stack.push(std::to_string(dif));
         responseMessage = Message(MessageType::OK, {});
@@ -204,16 +212,18 @@ void ClientConnection::chat_with_client()
         std::string value2 = operand_stack.get_top();
         operand_stack.pop();
         std::stringstream temp;
-        temp << value1 << value2;
+        temp << value1 << " " << value2;
         int first = 0;
         int second = 0;
-        temp >> first >> second;
+        if (!(temp >> first >> second)) {
+          throw OperationException("No two values");
+        }
         int div = second / first;
         operand_stack.push(std::to_string(div));
         responseMessage = Message(MessageType::OK, {});
       } else if (message.get_message_type() == MessageType::COMMIT) {
         if (!transaction) {
-          throw InvalidMessage("Cannot commit when no transaction begin\n");
+          throw InvalidMessage("Cannot commit when no transaction begin");
         }
         for (std::vector<std::string>::iterator it = modified_tables.begin(); it != modified_tables.end(); it++) {
           Table* table = m_server->getTable(*it);
@@ -225,11 +235,12 @@ void ClientConnection::chat_with_client()
           (*it)->unlock();
           m_server->addTable(*it);
         }
+        responseMessage = Message(MessageType::OK, {});
       } else if (message.get_message_type() == MessageType::BYE) {
         responseMessage = Message(MessageType::OK, {});
         ongoing = false;
       } else {
-        throw InvalidMessage("Response message is mistakenly sent\n"); //input message take form of response message
+        throw InvalidMessage("Response message is mistakenly sent"); //input message take form of response message
       }
     } catch (InvalidMessage &ex) {
       responseMessage = Message(MessageType::ERROR, {ex.what()});
