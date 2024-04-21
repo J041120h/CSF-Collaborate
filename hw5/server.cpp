@@ -21,6 +21,9 @@ Server::~Server()
   if (server_fd >= 0) {
     close(server_fd); // Close the server socket if it's open
   }
+  for (auto i = tables.begin(); i != tables.end(); i++) {
+    free(*i);
+  }
 }
 
 void Server::listen( const std::string &port )
