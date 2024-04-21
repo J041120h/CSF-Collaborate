@@ -36,7 +36,7 @@ void ClientConnection::chat_with_client()
     try {
       Message message;
       char buf[2048];
-      ssize_t n = rio_readlineb(&m_fdbuf, buf, sizeof(buf));
+      rio_readlineb(&m_fdbuf, buf, sizeof(buf));
       MessageSerialization::decode(buf, message); //potentially throw invalidMessage when input message is invalid
       if (message.get_message_type() == MessageType::BEGIN) {
         if (transaction) {
@@ -86,9 +86,6 @@ void ClientConnection::chat_with_client()
           bool temp = false; //check if setting value in newly created table in transaction
           for (std::vector<Table*>::iterator it = new_tables.begin(); it != new_tables.end(); it++) {
             if ((*it)->get_name() == table) {
-              if (!(*it)->has_key(key)) {
-                throw InvalidMessage("Input key unexist in table\n");
-              }
               (*it)->set(key, value);
               temp = true;
             }
@@ -104,9 +101,6 @@ void ClientConnection::chat_with_client()
               }
               modified_tables.push_back(table);
             }
-            if (!tableptr->has_key(key)) {
-              throw InvalidMessage("Input key unexist in table\n");
-            }
             tableptr->set(key, value); 
           }      
         } else {
@@ -115,10 +109,6 @@ void ClientConnection::chat_with_client()
             throw InvalidMessage("Try to modify an unexisting table\n");
           }
           tableptr->lock();
-          if (!tableptr->has_key(key)) {
-            tableptr->unlock();
-            throw InvalidMessage("Input key unexist in table\n");
-          }
           tableptr->set(key, value);
           tableptr->unlock();
         }     
