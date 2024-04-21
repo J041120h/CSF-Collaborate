@@ -1,5 +1,6 @@
 #include <cassert>
 #include <exception>
+#include <pthread.h>
 #include <stdexcept>
 #include "table.h"
 #include "exceptions.h"
@@ -10,7 +11,7 @@ Table::Table( const std::string &name )
   // TODO: initialize additional member variables
 {
   // Nothing to initialize in the first place
-  lockStatus = true;
+  pthread_mutex_init(&lockStatus, NULL);
 }
 
 Table::~Table()
@@ -21,19 +22,32 @@ Table::~Table()
 void Table::lock()
 {
   // TODO: implement
-  lockStatus = true;
+  pthread_mutex_lock(&lockStatus);
 }
 
 void Table::unlock()
 {
   // TODO: implement
-  lockStatus = false;
+  pthread_mutex_unlock(&lockStatus);
 }
 
 bool Table::trylock()
 {
-  // TODO: implement
-  return false;
+  // Try to acquire the lock without blocking
+    int result = pthread_mutex_trylock(&lockStatus);
+
+    if (result == 0) {
+        // Do work while the mutex is locked
+        return true; // Indicate success
+    } else if (result == EBUSY) {
+        // The mutex could not be acquired because it was already locked
+        return false;
+    } else {
+        // An error occurred
+        throw std::runtime_error("pthread_mutex_trylock failed");
+    }
+
+    return false; // Indicate failure
 }
 
 void Table::set( const std::string &key, const std::string &value )

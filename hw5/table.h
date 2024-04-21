@@ -11,7 +11,7 @@ private:
   // TODO: add member variables
   std::map<std::string, std::string> actual;
   std::map<std::string, std::string> temp;
-  bool lockStatus;
+  pthread_mutex_t lockStatus;
 
   // copy constructor and assignment operator are prohibited
   Table( const Table & );
