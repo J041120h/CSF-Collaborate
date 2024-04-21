@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
     char buf[2048];
     rio_readinitb(&rio, fd);
     Message responseMessage;
-    ssize_t n = rio_readlineb(&rio, buf, sizeof(buf));
+    rio_readlineb(&rio, buf, sizeof(buf));
     try {
       const std::string message(buf);
       MessageSerialization::decode(message, responseMessage);

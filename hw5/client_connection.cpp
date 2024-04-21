@@ -20,7 +20,7 @@ ClientConnection::ClientConnection( Server *server, int client_fd )
 
 ClientConnection::~ClientConnection()
 {
-
+  close(m_client_fd);
 }
 
 void ClientConnection::chat_with_client()
