@@ -58,12 +58,13 @@ void ClientConnection::chat_with_client()
             }
           }
         }
-        Table tableObject(message.get_table());
+        Table* tableObject = new Table(message.get_table());
         if (transaction) {
-          new_tables.push_back(&tableObject);
-          if(!tableObject.trylock()) {
+          new_tables.push_back(tableObject);
+          if(!tableObject->trylock()) {
             throw FailedTransaction("Transaction Failed\n");
           }
+          std::cout << "lock finished" << std::endl;
         } else {
           m_server->addTable(tableObject);
         }
@@ -92,7 +93,7 @@ void ClientConnection::chat_with_client()
           }
           if (!temp) {
             Table* tableptr = m_server->getTable(table);
-            if (tableptr == nullptr && !temp) {
+            if (tableptr == nullptr) {
               throw InvalidMessage("Try to modify an unexisting table\n");
             }
             if (std::find(modified_tables.begin(), modified_tables.end(), table) == modified_tables.end()) {
@@ -104,6 +105,7 @@ void ClientConnection::chat_with_client()
             tableptr->set(key, value); 
           }      
         } else {
+          std::cout << table << std::endl;
           Table* tableptr = m_server->getTable(table);
           if (tableptr == nullptr) {
             throw InvalidMessage("Try to modify an unexisting table\n");
@@ -111,7 +113,8 @@ void ClientConnection::chat_with_client()
           tableptr->lock();
           tableptr->set(key, value);
           tableptr->unlock();
-        }     
+        }
+        responseMessage = Message(MessageType::OK, {});     
       } else if (message.get_message_type() == MessageType::GET) {
         std::string table = message.get_table();
         std::string key = message.get_key();
@@ -155,6 +158,7 @@ void ClientConnection::chat_with_client()
           operand_stack.push(tableptr->get(key));
           tableptr->unlock();
         }
+        responseMessage = Message(MessageType::OK, {});
       } else if (message.get_message_type() == MessageType::ADD) {
         std::string value1 = operand_stack.get_top();
         operand_stack.pop();
@@ -219,7 +223,7 @@ void ClientConnection::chat_with_client()
         for (std::vector<Table*>::iterator it = new_tables.begin(); it != new_tables.end(); it++) {
           (*it)->commit_changes();
           (*it)->unlock();
-          m_server->addTable(**it);
+          m_server->addTable(*it);
         }
       } else if (message.get_message_type() == MessageType::BYE) {
         responseMessage = Message(MessageType::OK, {});

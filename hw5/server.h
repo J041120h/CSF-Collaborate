@@ -1,6 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <iostream>
 #include <map>
 #include <string>
 #include <pthread.h>
@@ -28,8 +29,8 @@ public:
   void log_error( const std::string &what );
 
   // TODO: add member functions
-  void addTable(Table& table) {
-    tables.push_back(&table);
+  void addTable(Table* table) {
+    tables.push_back(table);
   }
 
   Table* getTable(std::string& name) {
