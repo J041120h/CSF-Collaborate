@@ -26,7 +26,7 @@ Server::~Server()
 void Server::listen( const std::string &port )
 {
   // TODO: implement
-  int server_fd = open_listenfd(port.data());
+  server_fd = open_listenfd(port.data());
   if (server_fd < 0) { 
     this->log_error("Couldn't open server socket\n"); 
     throw CommException("Unable to start the server socket");
