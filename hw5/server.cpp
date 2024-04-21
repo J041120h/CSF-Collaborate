@@ -41,27 +41,26 @@ void Server::server_loop()
 {
   // TODO: implement
   while (true) {
-      int client_fd = Accept(server_fd, NULL, NULL);
+    int client_fd = Accept(server_fd, NULL, NULL);
 
-      if (client_fd < 0) {
-        throw CommException("Error accepting client connection");
-        continue; // Handle error and continue accepting new connections
+    if (client_fd < 0) {
+      throw CommException("Error accepting client connection");
+    }
+  
+    if (client_fd > 0) {
+      ClientConnection *client = new ClientConnection( this, client_fd );
+      pthread_t thr_id;
+      if ( pthread_create( &thr_id, nullptr, client_worker, client ) == 0 ) {
+        pthread_detach(thr_id);
+      } else {
+        delete client;
+        throw CommException( "Could not create client thread" );
       }
-    
-      if (client_fd > 0) {
-          ClientConnection *client = new ClientConnection( this, client_fd );
-          pthread_t thr_id;
-          if ( pthread_create( &thr_id, nullptr, client_worker, client ) != 0 ) {
-            throw CommException( "Could not create client thread" );
-          }
-          pthread_join(thr_id,NULL);
-          close(client_fd); // close the connection
-      }
+    }
   }
   close(server_fd);
   // Note that your code to start a worker thread for a newly-connected
   // client might look something like this:
-
 }
 
 
