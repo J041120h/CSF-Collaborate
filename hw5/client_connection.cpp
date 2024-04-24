@@ -47,7 +47,6 @@ void ClientConnection::chat_with_client()
       } else if (message.get_message_type() == MessageType::LOGIN) {
         responseMessage = Message(MessageType::OK, {});
       } else if (message.get_message_type() == MessageType::CREATE) {
-        std::cout << transaction << std::endl;
         std::string table = message.get_table();
         if (m_server->getTable(table) != nullptr) {
           throw InvalidMessage("Try to create a existing table");
@@ -61,12 +60,10 @@ void ClientConnection::chat_with_client()
         }
         Table* tableObject = new Table(message.get_table());
         if (transaction) {
-          std::cout << "enter transaction" << std::endl;
           new_tables.push_back(tableObject);
           if(!tableObject->trylock()) {
             throw FailedTransaction("Transaction Failed");
           }
-          std::cout << "lock finished" << std::endl;
         } else {
           m_server->addTable(tableObject);
         }
@@ -107,7 +104,6 @@ void ClientConnection::chat_with_client()
             tableptr->set(key, value); 
           }      
         } else {
-          std::cout << table << std::endl;
           Table* tableptr = m_server->getTable(table);
           if (tableptr == nullptr) {
             throw InvalidMessage("Try to modify an unexisting table");
@@ -231,6 +227,7 @@ void ClientConnection::chat_with_client()
           table->unlock();
         }
         for (std::vector<Table*>::iterator it = new_tables.begin(); it != new_tables.end(); it++) {
+          std::cout << (*it)->get_name() << std::endl;
           (*it)->commit_changes();
           (*it)->unlock();
           m_server->addTable(*it);

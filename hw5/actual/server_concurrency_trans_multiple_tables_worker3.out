@@ -1,0 +1,4 @@
+acct_num=0, src1=3, src2=2, dest=1, debit1=3, debit2=4
+acct_num=4, src1=2, src2=1, dest=3, debit1=8, debit2=4
+acct_num=3, src1=2, src2=1, dest=3, debit1=4, debit2=6
+acct_num=4, src1=2, src2=3, dest=1, debit1=8, debit2=4
