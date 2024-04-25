@@ -189,6 +189,7 @@ void MessageSerialization::decode( const std::string &encoded_msg_, Message &msg
     throw InvalidMessage("Encoded string fail to start with appropriate word\n");
   }
   if (!msg.is_valid()) {
+    std::cout << "catch invalid message" << std::endl;
     throw InvalidMessage("Encoded string fail to follow network Protocol");
   }
 }
