@@ -29,7 +29,6 @@ void ClientConnection::chat_with_client()
   bool transaction = false;
   ValueStack operand_stack;
   std::vector<std::string> modified_tables;
-  std::vector<Table*> new_tables;
   while (ongoing) {
     Message responseMessage;
     std::string encoded_message = "";
@@ -51,22 +50,8 @@ void ClientConnection::chat_with_client()
         if (m_server->getTable(table) != nullptr) {
           throw InvalidMessage("Try to create a existing table");
         }
-        if (transaction) {
-          for (std::vector<Table*>::iterator it = new_tables.begin(); it != new_tables.end(); it++) {
-            if ((*it)->get_name() == table) {
-              throw InvalidMessage("Try to create a existing table");
-            }
-          }
-        }
         Table* tableObject = new Table(message.get_table());
-        if (transaction) {
-          new_tables.push_back(tableObject);
-          if(!tableObject->trylock()) {
-            throw FailedTransaction("Transaction Failed");
-          }
-        } else {
-          m_server->addTable(tableObject);
-        }
+        m_server->addTable(tableObject);
         responseMessage = Message(MessageType::OK, {});
       } else if (message.get_message_type() == MessageType::PUSH) {
         operand_stack.push(message.get_value());
@@ -83,26 +68,17 @@ void ClientConnection::chat_with_client()
         std::string value = operand_stack.get_top();
         operand_stack.pop();
         if (transaction) {
-          bool temp = false; //check if setting value in newly created table in transaction
-          for (std::vector<Table*>::iterator it = new_tables.begin(); it != new_tables.end(); it++) {
-            if ((*it)->get_name() == table) {
-              (*it)->set(key, value);
-              temp = true;
-            }
+          Table* tableptr = m_server->getTable(table);
+          if (tableptr == nullptr) {
+            throw InvalidMessage("Try to modify an unexisting table");
           }
-          if (!temp) {
-            Table* tableptr = m_server->getTable(table);
-            if (tableptr == nullptr) {
-              throw InvalidMessage("Try to modify an unexisting table");
+          if (std::find(modified_tables.begin(), modified_tables.end(), table) == modified_tables.end()) {
+            if (!tableptr->trylock()) {
+              throw FailedTransaction("Table cannot get locked");
             }
-            if (std::find(modified_tables.begin(), modified_tables.end(), table) == modified_tables.end()) {
-              if (!tableptr->trylock()) {
-                throw FailedTransaction("Table cannot get locked");
-              }
-              modified_tables.push_back(table);
-            }
-            tableptr->set(key, value); 
-          }      
+            modified_tables.push_back(table);
+          }
+          tableptr->set(key, value);      
         } else {
           Table* tableptr = m_server->getTable(table);
           if (tableptr == nullptr) {
@@ -110,6 +86,7 @@ void ClientConnection::chat_with_client()
           }
           tableptr->lock();
           tableptr->set(key, value);
+          tableptr->commit_changes();
           tableptr->unlock();
         }
         responseMessage = Message(MessageType::OK, {});     
@@ -117,32 +94,20 @@ void ClientConnection::chat_with_client()
         std::string table = message.get_table();
         std::string key = message.get_key();
         if (transaction) {
-          bool temp = false; //check if setting value in newly created table in transaction
-          for (std::vector<Table*>::iterator it = new_tables.begin(); it != new_tables.end(); it++) {
-            if ((*it)->get_name() == table) {
-              if (!(*it)->has_key(key)) {
-                throw InvalidMessage("Input key unexist in table");
-              }
-              operand_stack.push((*it)->get(key));
-              temp = true;
-            }
+          Table* tableptr = m_server->getTable(table);
+          if (tableptr == nullptr) {
+            throw InvalidMessage("Try to access an unexisting table");
           }
-          if (!temp) {
-            Table* tableptr = m_server->getTable(table);
-            if (tableptr == nullptr && !temp) {
-              throw InvalidMessage("Try to access an unexisting table");
+          if (std::find(modified_tables.begin(), modified_tables.end(), table) == modified_tables.end()) {
+            if (!tableptr->trylock()) {
+              throw FailedTransaction("Table cannot get locked");
             }
-            if (std::find(modified_tables.begin(), modified_tables.end(), table) == modified_tables.end()) {
-              if (!tableptr->trylock()) {
-                throw FailedTransaction("Table cannot get locked");
-              }
-              modified_tables.push_back(table);
-            }
-            if (!tableptr->has_key(key)) {
-              throw InvalidMessage("Input key unexist in table");
-            }
-            operand_stack.push(tableptr->get(key)); 
-          }      
+            modified_tables.push_back(table);
+          }
+          if (!tableptr->has_key(key)) {
+            throw InvalidMessage("Input key unexist in table");
+          }
+          operand_stack.push(tableptr->get(key));   
         } else {
           Table* tableptr = m_server->getTable(table);
           if (tableptr == nullptr) {
@@ -225,12 +190,7 @@ void ClientConnection::chat_with_client()
           Table* table = m_server->getTable(*it);
           table->commit_changes();
           table->unlock();
-        }
-        for (std::vector<Table*>::iterator it = new_tables.begin(); it != new_tables.end(); it++) {
-          std::cout << (*it)->get_name() << std::endl;
-          (*it)->commit_changes();
-          (*it)->unlock();
-          m_server->addTable(*it);
+          transaction = false;
         }
         responseMessage = Message(MessageType::OK, {});
       } else if (message.get_message_type() == MessageType::BYE) {
