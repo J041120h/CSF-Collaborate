@@ -29,7 +29,9 @@ void ClientConnection::chat_with_client()
   bool transaction = false;
   ValueStack operand_stack;
   std::vector<std::string> modified_tables;
+  int count = 0;
   while (ongoing) {
+    count++;
     Message responseMessage;
     std::string encoded_message = "";
     try {
@@ -37,6 +39,9 @@ void ClientConnection::chat_with_client()
       char buf[2048];
       rio_readlineb(&m_fdbuf, buf, sizeof(buf));
       MessageSerialization::decode(buf, message); //potentially throw invalidMessage when input message is invalid
+      if (count == 1 && message.get_message_type() != MessageType::LOGIN) {
+        throw InvalidMessage("First message must be login");
+      }
       if (message.get_message_type() == MessageType::BEGIN) {
         if (transaction) {
           throw FailedTransaction("Cannot call begin again in transaction mode");
