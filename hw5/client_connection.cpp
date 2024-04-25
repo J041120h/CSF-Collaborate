@@ -192,6 +192,8 @@ void ClientConnection::chat_with_client()
           table->unlock();
           transaction = false;
         }
+        std::vector<std::string> new_modified_tables;
+        modified_tables = new_modified_tables;
         responseMessage = Message(MessageType::OK, {});
       } else if (message.get_message_type() == MessageType::BYE) {
         responseMessage = Message(MessageType::OK, {});
