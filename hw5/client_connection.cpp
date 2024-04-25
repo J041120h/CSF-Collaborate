@@ -223,7 +223,6 @@ void ClientConnection::chat_with_client()
       }
       std::vector<std::string> new_modified_tables;
       modified_tables = new_modified_tables;
-      ongoing = false;
     } catch (FailedTransaction &ex) {
       responseMessage = Message(MessageType::FAILED, {ex.what()});
       if (transaction) {
