@@ -221,6 +221,9 @@ void ClientConnection::chat_with_client()
         }
         transaction = false;
       }
+      std::vector<std::string> new_modified_tables;
+      modified_tables = new_modified_tables;
+      ongoing = false;
     } catch (FailedTransaction &ex) {
       responseMessage = Message(MessageType::FAILED, {ex.what()});
       if (transaction) {
@@ -231,6 +234,9 @@ void ClientConnection::chat_with_client()
         }
         transaction = false;
       }
+      std::vector<std::string> new_modified_tables;
+      modified_tables = new_modified_tables;
+      ongoing = false;
     }
     MessageSerialization::encode(responseMessage, encoded_message);
     rio_writen(m_client_fd, encoded_message.data(), encoded_message.length());
